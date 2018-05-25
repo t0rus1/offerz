@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "418989884436",
+    "firebase_url": "https://offerz-1.firebaseio.com",
+    "project_id": "offerz-1",
+    "storage_bucket": "offerz-1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:418989884436:android:3ba86b3d24f29140",
+        "android_client_info": {
+          "package_name": "com.likality.offerz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "418989884436-bbfjdhlq508vmmsv3s7sldrr5qku8l0h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.likality.offerz",
+            "certificate_hash": "39022ac51809d0017fdd10e16a18c92465256abf"
+          }
+        },
+        {
+          "client_id": "418989884436-gtf991u977ml25nt2p1k44efnk1loooe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuKWQhybOht6jp0HnJFP0fT95DQ3iaxk0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "418989884436-gtf991u977ml25nt2p1k44efnk1loooe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
