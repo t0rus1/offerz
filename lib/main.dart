@@ -8,6 +8,7 @@ import 'package:offerz/root_page.dart';
 import 'package:offerz/auth.dart';
 import 'package:offerz/ui/theme.dart';
 
+
 Future<void> main() async { 
 
   final FirebaseApp app = await FirebaseApp.configure(
@@ -25,19 +26,30 @@ Future<void> main() async {
 
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
 
-  MyApp({this.firestore});
-  final Firestore firestore;
+   MyApp({this.firestore});
+   final Firestore firestore;
 
+  @override
+  _MyAppState createState() => new _MyAppState();
 
-  // This widget is the root of your application.
+}
+
+class _MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: globals.mobileAppName,
       theme: companyThemeData,
-      home: new RootPage(new Auth(), this.firestore),
+      home: new RootPage(new Auth(), widget.firestore),
     );
   }
+
 }

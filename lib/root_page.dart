@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
-import 'package:offerz/auth.dart';
+import 'package:offerz/interface/baseauth.dart';
 import 'package:offerz/login_page.dart';
 import 'package:offerz/home_page.dart';
 
@@ -21,20 +21,20 @@ enum AuthStatus {
   signedIn,
 }
 
+
 class _RootPageState extends State<RootPage> {
   CollectionReference get users => widget.firestore.collection('users');
 
   AuthStatus authStatus = AuthStatus.notSignedIn;
 
   initState() {
-    super.initState();
-
+    super.initState();    
     widget.auth.currentUser().then((userId) {
       setState(() {
         authStatus =
             userId != null ? AuthStatus.signedIn : AuthStatus.notSignedIn;
       });
-    });
+    });    
   }
 
   //Add to users collection in cloud firestore
@@ -71,6 +71,7 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
+
     switch (authStatus) {
       case AuthStatus.notSignedIn:
         return new LoginPage(
@@ -86,6 +87,7 @@ class _RootPageState extends State<RootPage> {
             firestore: widget.firestore
         );
     }
-    return null; // should never execute
   }
+
+
 }

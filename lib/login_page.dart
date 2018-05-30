@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:offerz/globals.dart' as globals;
-import 'package:offerz/helpers/utils.dart' as utils;
+import 'package:offerz/helpers/utils.dart';
 import 'package:offerz/ui/primary_button.dart';
-import 'package:offerz/auth.dart';
+import 'package:offerz/interface/baseauth.dart';
 import 'package:offerz/ui/theme.dart';
 import 'package:offerz/ui/gradient_appbar.dart';
 
@@ -93,14 +93,14 @@ class _LoginPageState extends State<LoginPage> {
 
   List<Widget> usernameAndPassword() {
     return [
-      utils.padded(child: new TextFormField(
+      Utils.padded(child: new TextFormField(
         key: new Key('email'),
         decoration: new InputDecoration(labelText: 'Email'),
         autocorrect: false,
         validator: (val) => val.isEmpty ? 'Email can\'t be empty.' : null,
         onSaved: (val) => _email = val.trim(),
       )),
-      utils.padded(child: new TextFormField(
+      Utils.padded(child: new TextFormField(
         key: new Key('password'),
         decoration: new InputDecoration(labelText: 'Password'),
         obscureText: true,

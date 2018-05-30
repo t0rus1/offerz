@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
-import 'package:offerz/helpers/utils.dart' as utils;
+import 'package:offerz/helpers/utils.dart';
 import 'package:offerz/ui/theme.dart';
 import 'package:offerz/ui/primary_button.dart';
 import 'package:offerz/model/user.dart';
@@ -24,7 +24,6 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
 
   //the form will hydrate this establishment object
   Establishment _establishment = Establishment();
-
 
   int _saveCount = 0;
 
@@ -107,35 +106,35 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
 
   List<Widget> _establishmentFormFields() {
     return [
-      utils.padded(child: new TextFormField(
+      Utils.padded(child: new TextFormField(
         key: new Key('name'),
         decoration: new InputDecoration(labelText: 'Name of establishment'),
         autocorrect: false,
         validator: (val) => val.isEmpty ? 'Name can\'t be empty.' : null,
         onSaved: (val) => _establishment.name = val.trim(),
       )),
-      utils.padded(child: new TextFormField(
+      Utils.padded(child: new TextFormField(
         key: new Key('description'),
         decoration: new InputDecoration(labelText: 'Description / Tag line'),
         autocorrect: false,
         validator: (val) => val.isEmpty ? 'Description can\'t be empty.' : null,
         onSaved: (val) => _establishment.description = val.trim(),
       )),
-      utils.padded(child: new TextFormField(
+      Utils.padded(child: new TextFormField(
         key: new Key('product category'),
         decoration: new InputDecoration(labelText: 'Product category'),
         autocorrect: false,
         validator: (val) => val.isEmpty ? 'Category can\'t be empty.' : null,
         onSaved: (val) => _establishment.productCategory = val.trim(),
       )),
-      utils.padded(child: new TextFormField(
+      Utils.padded(child: new TextFormField(
         key: new Key('address'),
         decoration: new InputDecoration(labelText: 'Street address'),
         autocorrect: false,
         validator: (val) => val.isEmpty ? 'Address can\'t be empty.' : null,
         onSaved: (val) => _establishment.address = val.trim(),
       )),
-      utils.padded(child: new TextFormField(
+      Utils.padded(child: new TextFormField(
         key: new Key('country'),
         decoration: new InputDecoration(labelText: 'Country'),
         autocorrect: false,
@@ -143,7 +142,7 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
         validator: (val) => val.isEmpty ? 'Country can\'t be empty.' : null,
         onSaved: (val) => _establishment.country = val.trim(),
       )),
-      // utils.padded(child: new TextFormField(
+      // Utils.padded(child: new TextFormField(
       //   key: new Key('latitude'),
       //   decoration: new InputDecoration(labelText: 'Latitude'),
       //   autocorrect: false,
@@ -151,7 +150,7 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
       //   validator: (val) => val.isEmpty ? 'Latitude can\'t be empty.' : null,
       //   onSaved: (val) => _latitude = val.trim(),
       // )),
-      // utils.padded(child: new TextFormField(
+      // Utils.padded(child: new TextFormField(
       //   key: new Key('longitude'),
       //   decoration: new InputDecoration(labelText: 'Longitude'),
       //   autocorrect: false,

@@ -7,7 +7,12 @@ dependencies:
 
   firebase_auth: ^0.5.10  
   cloud_firestore: ^0.7.2 
-  location_picker: ^0.0.15
+  # location_picker: ^0.0.15
+  geolocation: "^0.2.1"
+  # opencage_geocoder: "^0.0.5"  
+  # geocoder: "^0.0.1"
+  # map_view: "^0.0.12"
+
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
-import 'package:offerz/auth.dart';
+import 'package:offerz/interface/baseauth.dart';
+import 'package:offerz/interface/basegeolocation.dart';
 import 'package:offerz/ui/theme.dart';
 import 'package:offerz/model/user.dart';
 import 'package:offerz/establishment_page.dart';
-import 'package:offerz/setlocation_page.dart';
+import 'package:offerz/helpers/user_geolocation.dart';
+import 'package:offerz/outletlocation_page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({this.auth, this.onSignOut, this.firestore});
@@ -27,8 +29,9 @@ class _HomePageState extends State<HomePage> {
   Widget _establishmentJoinDrawer;
   Widget _establishmentLocationDrawer;
 
-  Future<User> _retrieveVerifiedUser(String signedInEmail) async {
+  BaseGeolocation locationProvider = new Geolocater();
 
+  Future<User> _retrieveVerifiedUser(String signedInEmail) async {
     //obtain user from cloud firestore (document id the the email)
     CollectionReference users = widget.firestore.collection('users');
 
@@ -52,13 +55,9 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildUnverifiedUserWelcomeWidget() {
     return Card(
-      elevation: 2.0,
-      child: Column(
-        mainAxisSize: MainAxisSize.min, 
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(top: 10.0)
-          ),
+        elevation: 2.0,
+        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          Container(padding: EdgeInsets.only(top: 10.0)),
           const ListTile(
             //leading: const Icon(Icons.favorite_border),
             title: const Text(globals.welcomeNewRegistrantTitle),
@@ -77,29 +76,24 @@ class _HomePageState extends State<HomePage> {
             globals.resendOfferMessage,
           ),
           FlatButton(
-            color: AppThemeColors.main[100],
-            child: Text('Re-Send verification email'),
-            onPressed: () {
-              print('request verification email to be sent...');
-              widget.auth.sendVerificationMail();
-              print('request sent.');
-            }
-          ),
-          Container(
-            padding: EdgeInsets.only(top: 10.0)
-          ),  
-        ]
-      )
-    );
+              color: AppThemeColors.main[100],
+              child: Text('Re-Send verification email'),
+              onPressed: () {
+                print('request verification email to be sent...');
+                widget.auth.sendVerificationMail();
+                print('request sent.');
+              }),
+          Container(padding: EdgeInsets.only(top: 10.0)),
+        ]));
   }
 
   // clean login of verified user.
   Widget _buildVerifiedUserWelcomeWidget() {
-    print ('_buildVerifiedUserWelcomeWidget');
+    print('_buildVerifiedUserWelcomeWidget');
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
+        child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             Stack(
@@ -138,10 +132,8 @@ class _HomePageState extends State<HomePage> {
                 fontSize: 16.0,
               ),
             ),
-          ]
-        ),
-       )
-    );
+          ]),
+    ));
   }
 
   /// build a welcome widget based on whether user is email verified or not
@@ -155,15 +147,13 @@ class _HomePageState extends State<HomePage> {
       _verifiedUser = await _retrieveVerifiedUser(userEmail);
       print(_verifiedUser.eMail);
       _welcomeWidget = _buildVerifiedUserWelcomeWidget();
-    }
-    else {
+    } else {
       print('unverified');
       _welcomeWidget = _buildUnverifiedUserWelcomeWidget();
     }
   }
 
   Future<int> _userhasOutlets(email) async {
-
     DocumentReference userDoc;
 
     userDoc = widget.firestore.collection('users').document(email);
@@ -172,82 +162,94 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildEstablishmentManagementDrawer(int numOutlets) {
-
-    if (numOutlets==0) {
+    if (numOutlets == 0) {
       //user has no outlets (establishments) yet,
       return ListTile(
-        leading: Icon(
-          Icons.create,
-          color: AppThemeColors.main[900],
-          size: 36.0,
-        ),
-        title: Text('Create an establishment'),
-        subtitle: Text(
-          'in order to post your own offers...',
-        ),
-        onTap: () {
-          print('create establishment tapped');
-          //Navigator.pop(context);
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>  new EstablishmentPage(user: _verifiedUser, firestore: widget.firestore)
-            )
-          );
-        }
-      );
+          leading: Icon(
+            Icons.create,
+            color: AppThemeColors.main[900],
+            size: 36.0,
+          ),
+          title: Text('Create an establishment'),
+          subtitle: Text(
+            'in order to post your own offers...',
+          ),
+          onTap: () {
+            print('create establishment tapped');
+            //Navigator.pop(context);
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => new EstablishmentPage(
+                    user: _verifiedUser, firestore: widget.firestore)));
+          });
     } else {
       return ListTile(
-        leading: Icon(
-          Icons.subscriptions,
-          color: AppThemeColors.main[900],
-          size: 36.0,
-        ),
-        title: Text('Manage my establishment(s)'),
-        subtitle:
-          Text('you manage $numOutlets outlet(s)'),
-        onTap: () {
-          print('manage my establishments tapped');
-          Navigator.pop(context);
-        }
-      );
+          leading: Icon(
+            Icons.subscriptions,
+            color: AppThemeColors.main[900],
+            size: 36.0,
+          ),
+          title: Text('Manage my establishment(s)'),
+          subtitle: Text('you manage $numOutlets outlet(s)'),
+          onTap: () {
+            print('manage my establishments tapped');
+            Navigator.pop(context);
+          });
     }
   }
 
-  Widget _buildEstablishmentLocationDrawer(int numOutlets)  {
-    if (numOutlets == 0) { 
+  Widget _buildEstablishmentLocationDrawer(int numOutlets) {
+    if (!locationProvider.locationReady) {
       return ListTile(
-        leading: Icon(
-          Icons.pin_drop,
-          color: Colors.grey,
-          size: 36.0,
-        ),
-        title: Text('Set establishment location'),
-        subtitle: Text(
-          'once you\'ve created an establishment...',
-        ),
-        onTap: () {
-          //zippo
-        }
-      );
+          leading: Icon(
+            Icons.location_off,
+            color: Colors.grey,
+            size: 36.0,
+          ),
+          title: Text('location not currently known'),
+          onTap: () {
+            //zippo
+          });
+    }
+    if (numOutlets == 0) {
+      return ListTile(
+          leading: Icon(
+            Icons.pin_drop,
+            color: Colors.grey,
+            size: 36.0,
+          ),
+          title: Text('Set establishment location'),
+          subtitle: Text(
+            'once you\'ve created an establishment...',
+          ),
+          onTap: () {
+            //zippo
+          });
     } else {
       return ListTile(
-        leading: Icon(
-          Icons.pin_drop,
-          color: AppThemeColors.main[900],
-          size: 36.0,
-        ),
-        title: Text('Set establishment location'),
-        subtitle:
-            Text('locate you outlet(s) on the map'),
-        onTap: () {
-          print('set establishment location tapped');
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => SetLocationPage(),
-            )
-          );
-        });
+          leading: Icon(
+            Icons.pin_drop,
+            color: AppThemeColors.main[900],
+            size: 36.0,
+          ),
+          title: Text('Set/Alter Establishment location'),
+          subtitle: Text('to be implemeted'),
+          onTap: () {
+            print('Set establishment location tapped');
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => new OutletLocationPage(
+                    locationProvider, _onOutletLocationConfirmed)));
+          });
     }
+  }
+
+  //this call back is invoked when user confirms his outlet's location
+  //after being sent to outletlocation_page when he taps the item in the slide out drawer
+  //(see onTap in _buildEstablishmentLocationDrawer above)
+  void _onOutletLocationConfirmed() {
+    CollectionReference users = widget.firestore.collection('users');
+    DocumentReference userDoc = users.document(_verifiedUser.eMail);
+    CollectionReference userOutlets = userDoc.collection('outlets');
+    //DocumentReference userOutletDoc = userOutlets.limit(1).getDocuments().
   }
 
   Widget _buildEstablishmentJoinDrawer() {
@@ -265,6 +267,25 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
+  DrawerHeader _drawerHeader() {
+    String headerText = "${globals.mobileAppName} Main Menu";
+    if (_verifiedUser != null) {
+      headerText = "${_verifiedUser.eMail}";
+    }
+    // if (locationProvider.locationReady) {
+    //   headerText += '\nlast known location:';
+    //   headerText +=
+    //       "\nlat: ${locationProvider.latitude} long: ${locationProvider.longitude}";
+    // }
+    return DrawerHeader(
+      child: Text(
+        headerText,
+        style: TextStyle(fontSize: 14.0),
+      ),
+      decoration: BoxDecoration(color: AppThemeColors.main[400]),
+    );
+  }
+
   void _signOut() async {
     try {
       await widget.auth.signOut();
@@ -277,15 +298,19 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    print('setDeviceLocation started');
+    locationProvider.setDeviceLocation();
     print('enter HomePageState initstate');
     _buildWelcomeWidget().whenComplete(() {
       print('welcomeWidget built');
       _userhasOutlets(_verifiedUser.eMail).then((numOutlets) {
-        _establishmentManagementDrawer =_buildEstablishmentManagementDrawer(numOutlets);
+        _establishmentManagementDrawer =
+            _buildEstablishmentManagementDrawer(numOutlets);
         print('managementDrawer built');
         _establishmentJoinDrawer = _buildEstablishmentJoinDrawer();
         print('joinDrawer built');
-        _establishmentLocationDrawer =  _buildEstablishmentLocationDrawer(numOutlets);
+        _establishmentLocationDrawer =
+            _buildEstablishmentLocationDrawer(numOutlets);
         print('locationDrawer built');
         setState(() {
           print('setstate for HomePageState');
@@ -297,43 +322,27 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(globals.mobileAppName,
-            style: TextStyle(
-              color: AppThemeColors.main[50],
-              fontSize: 24.0,
-            )),
-        actions: <Widget>[
-          FlatButton(
-              onPressed: _signOut,
-              child: Text('Logout',
-                  style: TextStyle(fontSize: 17.0, color: Colors.white)))
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero, 
-          children: <Widget>[
-            DrawerHeader(
-              child: Text(
-                _verifiedUser == null
-                ? "${globals.mobileAppName} Main Menu"
-                : _verifiedUser.eMail
-              ),
-              decoration: BoxDecoration(
-                color: AppThemeColors.main[400]
-              ),
-            ),
-            _establishmentJoinDrawer,
-            _establishmentManagementDrawer,
-            _establishmentLocationDrawer,
-          ]
-        )
-      ),
-      backgroundColor: AppThemeColors.main[400],
-      body: Center(
-        child: _welcomeWidget
-      )
-    );
+        appBar: AppBar(
+          title: Text(globals.mobileAppName,
+              style: TextStyle(
+                color: AppThemeColors.main[50],
+                fontSize: 24.0,
+              )),
+          actions: <Widget>[
+            FlatButton(
+                onPressed: _signOut,
+                child: Text('Logout',
+                    style: TextStyle(fontSize: 17.0, color: Colors.white)))
+          ],
+        ),
+        drawer: Drawer(
+            child: ListView(padding: EdgeInsets.zero, children: <Widget>[
+          _drawerHeader(),
+          _establishmentJoinDrawer,
+          _establishmentManagementDrawer,
+          _establishmentLocationDrawer,
+        ])),
+        backgroundColor: AppThemeColors.main[400],
+        body: Center(child: _welcomeWidget));
   }
 }

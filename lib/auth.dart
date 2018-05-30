@@ -1,17 +1,7 @@
 import 'dart:async';
+import 'package:offerz/interface/baseauth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-//Keep this interface auth provider neutral!
-abstract class BaseAuth {
-
-  Future<String> currentUser();
-  Future<String> signIn(String email, String password);
-  Future<String> createUser(String email, String password);
-  Future<void> signOut();
-  Future<void> sendVerificationMail();
-  Future<bool> userIsVerified();
-  Future<String> currentUserEmail();
-}
 
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
