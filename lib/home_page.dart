@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
+import 'package:offerz/special_typedefs.dart';
 import 'package:offerz/interface/baseauth.dart';
 import 'package:offerz/interface/basegeolocation.dart';
 import 'package:offerz/ui/theme.dart';
@@ -22,14 +23,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //String _signedInEmail;
   User _verifiedUser; // signed in, verified user
   Widget _welcomeWidget;
-  Widget _establishmentManagementDrawer;
-  Widget _establishmentJoinDrawer;
-  Widget _establishmentLocationDrawer;
+  Widget _establishmentManagementDrawer =
+      ListTile(title: Text('management option...'));
+  Widget _establishmentJoinDrawer =
+      ListTile(title: Text('establishment option...'));
 
-  BaseGeolocation locationProvider = new Geolocater();
+  BaseGeolocation _geolocationProvider = new Geolocater();
 
   Future<User> _retrieveVerifiedUser(String signedInEmail) async {
     //obtain user from cloud firestore (document id the the email)
@@ -153,103 +154,110 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<int> _userhasOutlets(email) async {
-    DocumentReference userDoc;
+  // returns a list of establishments (IDs) that the user owns
+  Future<List<String>> _getUserOutletIDs(email) async {
+    var outletsList = new List<String>();
 
-    userDoc = widget.firestore.collection('users').document(email);
+    var userDoc = widget.firestore.collection('users').document(email);
     var snapshot = await userDoc.collection('outlets').getDocuments();
-    return snapshot.documents.length;
+
+    for (var item in snapshot.documents) {
+      outletsList.add(item.data['establishmentID']);
+    }
+    return outletsList;
   }
 
-  Widget _buildEstablishmentManagementDrawer(int numOutlets) {
-    if (numOutlets == 0) {
+  //this call back is invoked when user confirms his outlet's location
+  //it updates the latitude and longitude values in the establishment record
+  Future<void> _onOutletLocationConfirmed(
+      DocumentSnapshot establishmentSnapshot) async {
+    CollectionReference establishments =
+        widget.firestore.collection('establishments');
+    DocumentReference estabDoc =
+        establishments.document(establishmentSnapshot.documentID);
+
+    var updatedData = establishmentSnapshot.data;
+    estabDoc.setData(updatedData, merge: true).whenComplete(() {
+      print(
+          '_onOutletLocationConfirmed: updated lat and long in establishment ${updatedData['name']} record');
+      Navigator.of(context).pop();
+    }).catchError((e) => print(e));
+  }
+
+  Future<ListView> _buildOutletTilesList(List<String> userOutletIDs) async {
+    var listEntries = <Widget>[];
+
+    listEntries.add(Container(
+      color: AppThemeColors.main[100],
+      child:
+          Center(child: Text('Your outlets', style: TextStyle(fontSize: 20.0))),
+      height: 40.0,
+    ));
+
+    var estabs = widget.firestore.collection('establishments');
+
+    for (var ouletId in userOutletIDs) {
+      var estabDoc = estabs.document(ouletId);
+      var establishmentSnapshot = await estabDoc.get();
+      if (establishmentSnapshot != null) {
+        listEntries.add(ListTile(
+            leading: Icon(
+              Icons.restaurant,
+              color: AppThemeColors.main[900],
+              size: 24.0,
+            ),
+            title: Text(establishmentSnapshot.data['name']),
+            subtitle: Text(
+              'if you\'re at this establishment, tap to confirm its location',
+              //style: TextStyle(fontSize: 10.0),
+            ),
+            dense: true,
+            enabled: true,
+            trailing: Icon(
+              Icons.pin_drop,
+              color: AppThemeColors.main[900],
+              size: 24.0,
+            ),
+            onTap: () {
+              print('${establishmentSnapshot.data['name']} tapped');
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => new OutletLocationPage(
+                      _geolocationProvider,
+                      establishmentSnapshot,
+                      _onOutletLocationConfirmed)));
+            }));
+      }
+    }
+
+    return ListView(
+      shrinkWrap: true,
+      children: listEntries,
+    );
+  }
+
+  Future<Widget> _buildEstablishmentManagementDrawer(
+      List<String> userOutletIDs) async {
+    if (userOutletIDs.length == 0) {
       //user has no outlets (establishments) yet,
       return ListTile(
           leading: Icon(
             Icons.create,
             color: AppThemeColors.main[900],
-            size: 36.0,
+            size: 32.0,
           ),
-          title: Text('Create an establishment'),
+          title: Text('Create first establishment'),
           subtitle: Text(
-            'in order to post your own offers...',
+            'so you may post your own special offers...!',
           ),
           onTap: () {
             print('create establishment tapped');
-            //Navigator.pop(context);
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => new EstablishmentPage(
                     user: _verifiedUser, firestore: widget.firestore)));
           });
     } else {
-      return ListTile(
-          leading: Icon(
-            Icons.subscriptions,
-            color: AppThemeColors.main[900],
-            size: 36.0,
-          ),
-          title: Text('Manage my establishment(s)'),
-          subtitle: Text('you manage $numOutlets outlet(s)'),
-          onTap: () {
-            print('manage my establishments tapped');
-            Navigator.pop(context);
-          });
+      return await _buildOutletTilesList(userOutletIDs);
     }
-  }
-
-  Widget _buildEstablishmentLocationDrawer(int numOutlets) {
-    if (!locationProvider.locationReady) {
-      return ListTile(
-          leading: Icon(
-            Icons.location_off,
-            color: Colors.grey,
-            size: 36.0,
-          ),
-          title: Text('location not currently known'),
-          onTap: () {
-            //zippo
-          });
-    }
-    if (numOutlets == 0) {
-      return ListTile(
-          leading: Icon(
-            Icons.pin_drop,
-            color: Colors.grey,
-            size: 36.0,
-          ),
-          title: Text('Set establishment location'),
-          subtitle: Text(
-            'once you\'ve created an establishment...',
-          ),
-          onTap: () {
-            //zippo
-          });
-    } else {
-      return ListTile(
-          leading: Icon(
-            Icons.pin_drop,
-            color: AppThemeColors.main[900],
-            size: 36.0,
-          ),
-          title: Text('Set/Alter Establishment location'),
-          subtitle: Text('to be implemeted'),
-          onTap: () {
-            print('Set establishment location tapped');
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => new OutletLocationPage(
-                    locationProvider, _onOutletLocationConfirmed)));
-          });
-    }
-  }
-
-  //this call back is invoked when user confirms his outlet's location
-  //after being sent to outletlocation_page when he taps the item in the slide out drawer
-  //(see onTap in _buildEstablishmentLocationDrawer above)
-  void _onOutletLocationConfirmed() {
-    CollectionReference users = widget.firestore.collection('users');
-    DocumentReference userDoc = users.document(_verifiedUser.eMail);
-    CollectionReference userOutlets = userDoc.collection('outlets');
-    //DocumentReference userOutletDoc = userOutlets.limit(1).getDocuments().
   }
 
   Widget _buildEstablishmentJoinDrawer() {
@@ -299,21 +307,19 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     print('setDeviceLocation started');
-    locationProvider.setDeviceLocation();
+    _geolocationProvider.setDeviceLocation();
     print('enter HomePageState initstate');
     _buildWelcomeWidget().whenComplete(() {
       print('welcomeWidget built');
-      _userhasOutlets(_verifiedUser.eMail).then((numOutlets) {
-        _establishmentManagementDrawer =
-            _buildEstablishmentManagementDrawer(numOutlets);
-        print('managementDrawer built');
-        _establishmentJoinDrawer = _buildEstablishmentJoinDrawer();
-        print('joinDrawer built');
-        _establishmentLocationDrawer =
-            _buildEstablishmentLocationDrawer(numOutlets);
-        print('locationDrawer built');
-        setState(() {
-          print('setstate for HomePageState');
+      _getUserOutletIDs(_verifiedUser.eMail).then((userOutletIds) {
+        _buildEstablishmentManagementDrawer(userOutletIds).then((drawer) {
+          _establishmentManagementDrawer = drawer;
+          print('managementDrawer built');
+          _establishmentJoinDrawer = _buildEstablishmentJoinDrawer();
+          print('joinDrawer built');
+          setState(() {
+            print('setstate for HomePageState');
+          });
         });
       });
     });
@@ -340,7 +346,6 @@ class _HomePageState extends State<HomePage> {
           _drawerHeader(),
           _establishmentJoinDrawer,
           _establishmentManagementDrawer,
-          _establishmentLocationDrawer,
         ])),
         backgroundColor: AppThemeColors.main[400],
         body: Center(child: _welcomeWidget));

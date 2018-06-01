@@ -2,16 +2,20 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:offerz/globals.dart' as globals;
+import 'package:offerz/special_typedefs.dart';
 import 'package:offerz/ui/theme.dart';
 import 'package:offerz/interface/basegeolocation.dart';
-import 'package:offerz/globals.dart' as globals;
 
 class OutletLocationPage extends StatefulWidget {
-  OutletLocationPage(this.locationProvider, this.onOutletLocationConfirmed);
+  OutletLocationPage(
+      this.locationProvider, this.outletInfo, this.onOutletLocationConfirmed);
 
   final BaseGeolocation locationProvider;
-  final VoidCallback onOutletLocationConfirmed;
+  final DocumentSnapshot outletInfo;
+  final WithDocumentSnapshotFunction onOutletLocationConfirmed;
 
   @override
   State<StatefulWidget> createState() => new _OutletLocationPageState();
@@ -84,9 +88,15 @@ class _OutletLocationPageState extends State<OutletLocationPage> {
               )),
         ),
         floatingActionButton: FloatingActionButton(
-          tooltip: 'confirm outlet\'s location',
+          tooltip: 'confirm ${widget.outletInfo.data['name']}\'s location',
           child: Icon(Icons.done),
-          onPressed: () => widget.onOutletLocationConfirmed,
+          onPressed: () {
+            widget.outletInfo.data['latitude'] =
+                widget.locationProvider.latitude;
+            widget.outletInfo.data['longitude'] =
+                widget.locationProvider.longitude;
+            widget.onOutletLocationConfirmed(widget.outletInfo);
+          },
         ),
         body: Stack(
           children: <Widget>[
@@ -115,7 +125,7 @@ class _OutletLocationPageState extends State<OutletLocationPage> {
                 decoration:
                     BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
                 child: Text(
-                  'Confirm your outlet\'s location',
+                  'confirm ${widget.outletInfo.data['name']}\'s location',
                   style: TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold,

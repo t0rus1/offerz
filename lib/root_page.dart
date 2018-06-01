@@ -40,7 +40,7 @@ class _RootPageState extends State<RootPage> {
   //Add to users collection in cloud firestore
   //and send verification email
   _addUser(String email) async {
-    final DocumentReference userDoc = users.document('$email');
+    DocumentReference userDoc = users.document('$email');
 
     Map<String, dynamic> userData = <String, dynamic>{
       'email': email,
