@@ -15,7 +15,7 @@ Future<void> main() async {
       googleAppID: '1:418989884436:android:3ba86b3d24f29140',
       gcmSenderID: '418989884436',
       apiKey:
-          'AIzaSyArgmRGfB5kiQT6CunAOmKRVKEsxKmy6YI-G72PVU', // not right, just an example
+          'AIzaSyD9tDZ3Vk7HZjt4xpY6-O-gVbAFC8MJucE', // doesn't seem to matter
       projectID: 'offerz-1',
     ),
   );

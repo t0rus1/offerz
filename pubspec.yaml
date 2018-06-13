@@ -5,8 +5,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  firebase_auth: ^0.5.10  
-  cloud_firestore: ^0.7.2 
+  firebase_auth: ^0.5.11
+  cloud_firestore: ^0.7.3 
   # location_picker: ^0.0.15
   geolocation: "^0.2.1"
   # opencage_geocoder: "^0.0.5"  

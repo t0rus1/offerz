@@ -61,6 +61,7 @@ class Geolocater implements BaseGeolocation {
   }
 
   setDeviceLocation() {
+    print('setDeviceLocation');
     Geolocation
         .currentLocation(accuracy: LocationAccuracy.best)
         .listen(handleLocationResult);

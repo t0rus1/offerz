@@ -21,20 +21,19 @@ enum AuthStatus {
   signedIn,
 }
 
-
 class _RootPageState extends State<RootPage> {
   CollectionReference get users => widget.firestore.collection('users');
 
   AuthStatus authStatus = AuthStatus.notSignedIn;
 
   initState() {
-    super.initState();    
+    super.initState();
     widget.auth.currentUser().then((userId) {
       setState(() {
         authStatus =
             userId != null ? AuthStatus.signedIn : AuthStatus.notSignedIn;
       });
-    });    
+    });
   }
 
   //Add to users collection in cloud firestore
@@ -44,7 +43,8 @@ class _RootPageState extends State<RootPage> {
 
     Map<String, dynamic> userData = <String, dynamic>{
       'email': email,
-      'role_patron': false,  // gets set when user is linked to his first establishment
+      'role_patron':
+          false, // gets set when user is linked to his first establishment
       'role_proprietor': false, // gets set when user becomes a proprietor
     };
     userDoc.setData(userData, merge: false).whenComplete(() {
@@ -71,7 +71,6 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
-
     switch (authStatus) {
       case AuthStatus.notSignedIn:
         return new LoginPage(
@@ -84,10 +83,8 @@ class _RootPageState extends State<RootPage> {
         return new HomePage(
             auth: widget.auth,
             onSignOut: () => _updateAuthStatus(AuthStatus.notSignedIn),
-            firestore: widget.firestore
-        );
+            firestore: widget.firestore);
     }
   }
-
-
 }
+

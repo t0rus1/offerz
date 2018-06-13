@@ -11,6 +11,7 @@ import 'package:offerz/model/user.dart';
 import 'package:offerz/establishment_page.dart';
 import 'package:offerz/helpers/user_geolocation.dart';
 import 'package:offerz/outletlocation_page.dart';
+import 'package:offerz/outlethome_page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({this.auth, this.onSignOut, this.firestore});
@@ -25,14 +26,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   User _verifiedUser; // signed in, verified user
   Widget _welcomeWidget;
-  Widget _establishmentManagementDrawer =
-      ListTile(title: Text('management option...'));
-  Widget _establishmentJoinDrawer =
-      ListTile(title: Text('establishment option...'));
+  Widget _drawerHead;
+  Widget _establishmentManagementDrawer;
+  Widget _establishmentJoinDrawer;
 
-  BaseGeolocation _geolocationProvider = new Geolocater();
+  BaseGeolocation _geolocationProvider =
+      new Geolocater(); // usable once its 'setDeviceLocation' method has been called
 
-  Future<User> _retrieveVerifiedUser(String signedInEmail) async {
+  Future<User> _getVerifiedUser(String signedInEmail) async {
+    print('_getVerifiedUser($signedInEmail)');
     //obtain user from cloud firestore (document id the the email)
     CollectionReference users = widget.firestore.collection('users');
 
@@ -40,7 +42,7 @@ class _HomePageState extends State<HomePage> {
     DocumentSnapshot userSnapshot = await userDoc.get();
 
     if (userSnapshot.exists) {
-      print('user ${userSnapshot.data['email']} retrieved');
+      print('user ${userSnapshot.data['email']} retrieved from firesstore');
       // instantiate our User object (a State variable)
       return User(
         eMail: userSnapshot.data['email'],
@@ -48,13 +50,14 @@ class _HomePageState extends State<HomePage> {
         roleProprietor: userSnapshot.data['role_patron'],
       );
     } else {
-      print('Error, failed to retrieve user $signedInEmail');
+      print('Error, failed to retrieve user $signedInEmail from firestore');
       // should not happen
       return User(eMail: '', rolePatron: false, roleProprietor: false);
     }
   }
 
-  Widget _buildUnverifiedUserWelcomeWidget() {
+  Widget _unverifiedWelcome() {
+    print('_unverifiedWelcome()');
     return Card(
         elevation: 2.0,
         child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
@@ -89,8 +92,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   // clean login of verified user.
-  Widget _buildVerifiedUserWelcomeWidget() {
-    print('_buildVerifiedUserWelcomeWidget');
+  Widget _verifiedWelcome() {
+    print('_verifiedWelcome()');
     return Center(
         child: Padding(
       padding: const EdgeInsets.all(8.0),
@@ -137,25 +140,26 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
-  /// build a welcome widget based on whether user is email verified or not
-  /// which serves as the Home Page's main content
-  Future<void> _buildWelcomeWidget() async {
-    print('_buildWelcomeWidget start...');
+  // build a welcome widget based on whether user is email verified or not
+  // which serves as the Home Page's main content
+  Future<void> _welcome() async {
+    print('_welcome()');
     bool verified = await widget.auth.userIsVerified();
     if (verified) {
       print('verified');
       String userEmail = await widget.auth.currentUserEmail();
-      _verifiedUser = await _retrieveVerifiedUser(userEmail);
+      _verifiedUser = await _getVerifiedUser(userEmail);
       print(_verifiedUser.eMail);
-      _welcomeWidget = _buildVerifiedUserWelcomeWidget();
+      _welcomeWidget = _verifiedWelcome();
     } else {
       print('unverified');
-      _welcomeWidget = _buildUnverifiedUserWelcomeWidget();
+      _welcomeWidget = _unverifiedWelcome();
     }
   }
 
   // returns a list of establishments (IDs) that the user owns
   Future<List<String>> _getUserOutletIDs(email) async {
+    print('_getUserOutletIDs($email)');
     var outletsList = new List<String>();
 
     var userDoc = widget.firestore.collection('users').document(email);
@@ -164,13 +168,15 @@ class _HomePageState extends State<HomePage> {
     for (var item in snapshot.documents) {
       outletsList.add(item.data['establishmentID']);
     }
+    print('${outletsList.length} outlets found');
+
     return outletsList;
   }
 
   //this call back is invoked when user confirms his outlet's location
   //it updates the latitude and longitude values in the establishment record
-  Future<void> _onOutletLocationConfirmed(
-      DocumentSnapshot establishmentSnapshot) async {
+  Future<void> _onOutletLocated(DocumentSnapshot establishmentSnapshot) async {
+    print('_onOutletLocated()');
     CollectionReference establishments =
         widget.firestore.collection('establishments');
     DocumentReference estabDoc =
@@ -179,20 +185,25 @@ class _HomePageState extends State<HomePage> {
     var updatedData = establishmentSnapshot.data;
     estabDoc.setData(updatedData, merge: true).whenComplete(() {
       print(
-          '_onOutletLocationConfirmed: updated lat and long in establishment ${updatedData['name']} record');
+          '_onOutletLocated: updated lat, long in estab. ${updatedData['name']} record');
       Navigator.of(context).pop();
     }).catchError((e) => print(e));
   }
 
-  Future<ListView> _buildOutletTilesList(List<String> userOutletIDs) async {
+  //build list of outlets for current user
+  Future<ListView> _outletTilesList(List<String> userOutletIDs) async {
+    print('_outletTilesList()');
     var listEntries = <Widget>[];
 
-    listEntries.add(Container(
-      color: AppThemeColors.main[100],
-      child:
-          Center(child: Text('Your outlets', style: TextStyle(fontSize: 20.0))),
-      height: 40.0,
-    ));
+    if (userOutletIDs.length > 0) {
+      listEntries.add(Container(
+        color: AppThemeColors.main[100],
+        child: Center(
+            child:
+                Text('Your Establishments', style: TextStyle(fontSize: 20.0))),
+        height: 40.0,
+      ));
+    }
 
     var estabs = widget.firestore.collection('establishments');
 
@@ -200,31 +211,44 @@ class _HomePageState extends State<HomePage> {
       var estabDoc = estabs.document(ouletId);
       var establishmentSnapshot = await estabDoc.get();
       if (establishmentSnapshot != null) {
+        bool notLocated = establishmentSnapshot.data['latitude'] == null ||
+            establishmentSnapshot.data['longitude'] == null;
+
+        var estabName = establishmentSnapshot.data['name'];
+        var estabAddr = establishmentSnapshot.data['address'];
+
         listEntries.add(ListTile(
             leading: Icon(
               Icons.restaurant,
               color: AppThemeColors.main[900],
               size: 24.0,
             ),
-            title: Text(establishmentSnapshot.data['name']),
-            subtitle: Text(
-              'if you\'re at this establishment, tap to confirm its location',
-              //style: TextStyle(fontSize: 10.0),
-            ),
+            title: Text(estabName),
+            subtitle: Text(notLocated
+                    ? 'Tap to confirm you are at $estabName\'s location (else leave for when you are)'
+                    : estabAddr
+                //style: TextStyle(fontSize: 10.0),
+                ),
             dense: true,
             enabled: true,
-            trailing: Icon(
-              Icons.pin_drop,
-              color: AppThemeColors.main[900],
-              size: 24.0,
-            ),
+            // trailing: Icon(
+            //   Icons.pin_drop,
+            //   color: AppThemeColors.main[900],
+            //   size: 24.0,
+            // ),
             onTap: () {
               print('${establishmentSnapshot.data['name']} tapped');
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => new OutletLocationPage(
-                      _geolocationProvider,
-                      establishmentSnapshot,
-                      _onOutletLocationConfirmed)));
+              if (notLocated) {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => new OutletLocationPage(
+                        _geolocationProvider,
+                        establishmentSnapshot,
+                        _onOutletLocated)));
+              } else {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) =>
+                        OutletHomePage(establishmentSnapshot)));
+              }
             }));
       }
     }
@@ -235,8 +259,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<Widget> _buildEstablishmentManagementDrawer(
-      List<String> userOutletIDs) async {
+  Future<Widget> _estabMngmntDrawer(List<String> userOutletIDs) async {
+    print('_estabMngmntDrawer()');
     if (userOutletIDs.length == 0) {
       //user has no outlets (establishments) yet,
       return ListTile(
@@ -256,11 +280,12 @@ class _HomePageState extends State<HomePage> {
                     user: _verifiedUser, firestore: widget.firestore)));
           });
     } else {
-      return await _buildOutletTilesList(userOutletIDs);
+      return await _outletTilesList(userOutletIDs);
     }
   }
 
-  Widget _buildEstablishmentJoinDrawer() {
+  Widget _estabJoinDrawer() {
+    print('_estabJoinDrawer()');
     return ListTile(
         leading: Icon(
           Icons.add_location,
@@ -276,15 +301,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   DrawerHeader _drawerHeader() {
+    print('_drawerHeader()');
     String headerText = "${globals.mobileAppName} Main Menu";
     if (_verifiedUser != null) {
       headerText = "${_verifiedUser.eMail}";
     }
-    // if (locationProvider.locationReady) {
-    //   headerText += '\nlast known location:';
-    //   headerText +=
-    //       "\nlat: ${locationProvider.latitude} long: ${locationProvider.longitude}";
-    // }
     return DrawerHeader(
       child: Text(
         headerText,
@@ -306,19 +327,19 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    print('setDeviceLocation started');
+
+    print('HomePageState initState()');
+
     _geolocationProvider.setDeviceLocation();
-    print('enter HomePageState initstate');
-    _buildWelcomeWidget().whenComplete(() {
-      print('welcomeWidget built');
+
+    _welcome().whenComplete(() {
       _getUserOutletIDs(_verifiedUser.eMail).then((userOutletIds) {
-        _buildEstablishmentManagementDrawer(userOutletIds).then((drawer) {
-          _establishmentManagementDrawer = drawer;
-          print('managementDrawer built');
-          _establishmentJoinDrawer = _buildEstablishmentJoinDrawer();
-          print('joinDrawer built');
+        _estabMngmntDrawer(userOutletIds).then((mngmntDrawer) {
           setState(() {
-            print('setstate for HomePageState');
+            _drawerHead = _drawerHeader();
+            _establishmentManagementDrawer = mngmntDrawer;
+            _establishmentJoinDrawer = _estabJoinDrawer();
+            print('setState() for HomePageState');
           });
         });
       });
@@ -327,6 +348,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print('building...');
     return Scaffold(
         appBar: AppBar(
           title: Text(globals.mobileAppName,
@@ -343,7 +365,7 @@ class _HomePageState extends State<HomePage> {
         ),
         drawer: Drawer(
             child: ListView(padding: EdgeInsets.zero, children: <Widget>[
-          _drawerHeader(),
+          _drawerHead,
           _establishmentJoinDrawer,
           _establishmentManagementDrawer,
         ])),

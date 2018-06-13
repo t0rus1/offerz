@@ -88,7 +88,7 @@ class _OutletLocationPageState extends State<OutletLocationPage> {
               )),
         ),
         floatingActionButton: FloatingActionButton(
-          tooltip: 'confirm ${widget.outletInfo.data['name']}\'s location',
+          tooltip: 'Confirm ${widget.outletInfo.data['name']}\'s location',
           child: Icon(Icons.done),
           onPressed: () {
             widget.outletInfo.data['latitude'] =
@@ -125,7 +125,7 @@ class _OutletLocationPageState extends State<OutletLocationPage> {
                 decoration:
                     BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
                 child: Text(
-                  'confirm ${widget.outletInfo.data['name']}\'s location',
+                  'Confirm you\'re at ${widget.outletInfo.data['name']}\'s location',
                   style: TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold,
