@@ -22,8 +22,9 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   static final formKey = new GlobalKey<FormState>();
 
-  //the form will hydrate this establishment object
-  Establishment _establishment = Establishment();
+  //the form will hydrate this establishment object properly
+  static final dummyData = Map<String, dynamic>();
+  Establishment _establishment = Establishment(dummyData);
 
   int _saveCount = 0;
 
@@ -56,7 +57,8 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
         'proprietor': _establishment.proprietor,
       };
       // add an establishment (regardless)
-      final CollectionReference establishments = widget.firestore.collection('establishments');
+      final CollectionReference establishments =
+          widget.firestore.collection('establishments');
       establishments.add(establishmentData).then((docRef) {
         print('establishment ${_establishment.name} added');
         //also save to outlets collection of user entry
@@ -65,7 +67,8 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
           'establishmentID': docRef.documentID,
         };
         final CollectionReference users = widget.firestore.collection('users');
-        final DocumentReference userDoc = users.document(_establishment.proprietor);
+        final DocumentReference userDoc =
+            users.document(_establishment.proprietor);
         final CollectionReference outlets = userDoc.collection('outlets');
         outlets.add(outletData).whenComplete(() {
           print('outlet added to user ${_establishment.proprietor}');
@@ -73,8 +76,7 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
             _saveCount++;
           });
         });
-      }).catchError((e)=>print(e));
-
+      }).catchError((e) => print(e));
     } else {
       print('form did not validate');
     }
@@ -84,7 +86,7 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
     if (_saveCount == 0) {
       return Padding(
         padding: const EdgeInsets.all(8.0),
-        child: PrimaryButton(                    
+        child: PrimaryButton(
           key: new Key('submit'),
           text: 'create establishment',
           height: 44.0,
@@ -93,52 +95,57 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
       );
     } else {
       return Padding(
-        padding: const EdgeInsets.all(8.0),         
+        padding: const EdgeInsets.all(8.0),
         child: FlatButton(
-          color: Colors.green, 
-          textColor: Colors.white,            
+          color: Colors.green,
+          textColor: Colors.white,
           child: Text('Great! next, please set establishment location'),
           onPressed: () => Navigator.of(context).pop(),
         ),
-      ); 
+      );
     }
   }
 
   List<Widget> _establishmentFormFields() {
     return [
-      Utils.padded(child: new TextFormField(
+      Utils.padded(
+          child: new TextFormField(
         key: new Key('name'),
         decoration: new InputDecoration(labelText: 'Name of establishment'),
         autocorrect: false,
         validator: (val) => val.isEmpty ? 'Name can\'t be empty.' : null,
         onSaved: (val) => _establishment.name = val.trim(),
       )),
-      Utils.padded(child: new TextFormField(
+      Utils.padded(
+          child: new TextFormField(
         key: new Key('description'),
         decoration: new InputDecoration(labelText: 'Description / Tag line'),
         autocorrect: false,
         validator: (val) => val.isEmpty ? 'Description can\'t be empty.' : null,
         onSaved: (val) => _establishment.description = val.trim(),
       )),
-      Utils.padded(child: new TextFormField(
+      Utils.padded(
+          child: new TextFormField(
         key: new Key('product category'),
         decoration: new InputDecoration(labelText: 'Product category'),
         autocorrect: false,
         validator: (val) => val.isEmpty ? 'Category can\'t be empty.' : null,
         onSaved: (val) => _establishment.productCategory = val.trim(),
       )),
-      Utils.padded(child: new TextFormField(
+      Utils.padded(
+          child: new TextFormField(
         key: new Key('address'),
         decoration: new InputDecoration(labelText: 'Street address'),
         autocorrect: false,
         validator: (val) => val.isEmpty ? 'Address can\'t be empty.' : null,
         onSaved: (val) => _establishment.address = val.trim(),
       )),
-      Utils.padded(child: new TextFormField(
+      Utils.padded(
+          child: new TextFormField(
         key: new Key('country'),
         decoration: new InputDecoration(labelText: 'Country'),
         autocorrect: false,
-        initialValue: 'South Africa',          
+        initialValue: 'South Africa',
         validator: (val) => val.isEmpty ? 'Country can\'t be empty.' : null,
         onSaved: (val) => _establishment.country = val.trim(),
       )),
@@ -146,7 +153,7 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
       //   key: new Key('latitude'),
       //   decoration: new InputDecoration(labelText: 'Latitude'),
       //   autocorrect: false,
-      //   initialValue: _latitude, 
+      //   initialValue: _latitude,
       //   validator: (val) => val.isEmpty ? 'Latitude can\'t be empty.' : null,
       //   onSaved: (val) => _latitude = val.trim(),
       // )),
@@ -154,7 +161,7 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
       //   key: new Key('longitude'),
       //   decoration: new InputDecoration(labelText: 'Longitude'),
       //   autocorrect: false,
-      //   initialValue: _longitude, 
+      //   initialValue: _longitude,
       //   validator: (val) => val.isEmpty ? 'Longitude can\'t be empty.' : null,
       //   onSaved: (val) => _longitude = val.trim(),
       // )),
@@ -181,46 +188,37 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          globals.mobileAppName,
-          style: TextStyle(
-            color: AppThemeColors.main[50],
-            fontSize: 24.0,
-          )
-        ),
+        title: Text(globals.mobileAppName,
+            style: TextStyle(
+              color: AppThemeColors.main[50],
+              fontSize: 24.0,
+            )),
       ),
       key: scaffoldKey,
       backgroundColor: AppThemeColors.main[900],
       body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10.0 ),
-          child: Column(
-            children: [
-              Card(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Form(
-                        key: formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.start, 
-                          children: _establishmentFormFields(),                           
+          child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Column(children: [
+                Card(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Form(
+                          key: formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: _establishmentFormFields(),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ]
-          )
-        )
-      ),
+              ]))),
     );
   }
-
 }
-
-

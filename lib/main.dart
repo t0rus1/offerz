@@ -43,6 +43,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: globals.mobileAppName,
       theme: companyThemeData,
       home: new RootPage(new Auth(), widget.firestore),

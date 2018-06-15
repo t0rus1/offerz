@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
+import 'package:offerz/model/establishment.dart';
 import 'package:offerz/special_typedefs.dart';
 import 'package:offerz/interface/baseauth.dart';
 import 'package:offerz/interface/basegeolocation.dart';
@@ -205,17 +206,15 @@ class _HomePageState extends State<HomePage> {
       ));
     }
 
-    var estabs = widget.firestore.collection('establishments');
+    var estabsCollection = widget.firestore.collection('establishments');
 
     for (var ouletId in userOutletIDs) {
-      var estabDoc = estabs.document(ouletId);
-      var establishmentSnapshot = await estabDoc.get();
-      if (establishmentSnapshot != null) {
-        bool notLocated = establishmentSnapshot.data['latitude'] == null ||
-            establishmentSnapshot.data['longitude'] == null;
-
-        var estabName = establishmentSnapshot.data['name'];
-        var estabAddr = establishmentSnapshot.data['address'];
+      var estabDoc = estabsCollection.document(ouletId);
+      var estabShot = await estabDoc.get();
+      if (estabShot != null) {
+        var establishment = Establishment(estabShot.data);
+        bool notLocated =
+            establishment.latitude == null || establishment.longitude == null;
 
         listEntries.add(ListTile(
             leading: Icon(
@@ -223,31 +222,23 @@ class _HomePageState extends State<HomePage> {
               color: AppThemeColors.main[900],
               size: 24.0,
             ),
-            title: Text(estabName),
+            title: Text(establishment.name),
             subtitle: Text(notLocated
-                    ? 'Tap to confirm you are at $estabName\'s location (else leave for when you are)'
-                    : estabAddr
+                    ? 'Tap to confirm you are at ${establishment.name}\'s location (else leave for when you are)'
+                    : establishment.address
                 //style: TextStyle(fontSize: 10.0),
                 ),
             dense: true,
             enabled: true,
-            // trailing: Icon(
-            //   Icons.pin_drop,
-            //   color: AppThemeColors.main[900],
-            //   size: 24.0,
-            // ),
             onTap: () {
-              print('${establishmentSnapshot.data['name']} tapped');
+              print('${establishment.name} tapped');
               if (notLocated) {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => new OutletLocationPage(
-                        _geolocationProvider,
-                        establishmentSnapshot,
-                        _onOutletLocated)));
+                        _geolocationProvider, estabShot, _onOutletLocated)));
               } else {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        OutletHomePage(establishmentSnapshot)));
+                    builder: (context) => OutletHomePage(establishment)));
               }
             }));
       }

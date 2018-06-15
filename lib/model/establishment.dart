@@ -1,4 +1,15 @@
 class Establishment {
+  //constructor allows creation off a passed in DocumentSnapshot
+  Establishment(Map<String, dynamic> data) {
+    address = data['address'] ?? '';
+    country = data['country'] ?? '';
+    description = data['description'] ?? '';
+    latitude = data['latitude'] ?? '';
+    longitude = data['longitude'] ?? '';
+    name = data['name'] ?? '';
+    productCategory = data['product_category'] ?? '';
+    proprietor = data['proprietor'] ?? '';
+  }
 
   String _address;
   String get address => _address;
@@ -46,6 +57,5 @@ class Establishment {
   String get proprietor => _proprietor;
   set proprietor(String proprietor) {
     _proprietor = proprietor;
-  } 
-
+  }
 }
