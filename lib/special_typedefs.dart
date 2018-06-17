@@ -1,4 +1,4 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:offerz/model/establishment.dart';
 
-typedef Future<void> WithDocumentSnapshotFunction(DocumentSnapshot snapshot);
+typedef Future<void> WithEstablishmentFunction(Establishment estabmnt);

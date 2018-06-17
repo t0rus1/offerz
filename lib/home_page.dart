@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
 import 'package:offerz/model/establishment.dart';
-import 'package:offerz/special_typedefs.dart';
 import 'package:offerz/interface/baseauth.dart';
 import 'package:offerz/interface/basegeolocation.dart';
 import 'package:offerz/ui/theme.dart';
@@ -176,27 +175,29 @@ class _HomePageState extends State<HomePage> {
 
   //this call back is invoked when user confirms his outlet's location
   //it updates the latitude and longitude values in the establishment record
-  Future<void> _onOutletLocated(DocumentSnapshot establishmentSnapshot) async {
+  Future<void> _onOutletLocated(Establishment establishment) async {
     print('_onOutletLocated()');
-    CollectionReference establishments =
-        widget.firestore.collection('establishments');
-    DocumentReference estabDoc =
-        establishments.document(establishmentSnapshot.documentID);
+    Map<String, dynamic> updatedCoOrds = {
+      'latitude': establishment.latitude,
+      'longitude': establishment.longitude,
+    };
 
-    var updatedData = establishmentSnapshot.data;
-    estabDoc.setData(updatedData, merge: true).whenComplete(() {
-      print(
-          '_onOutletLocated: updated lat, long in estab. ${updatedData['name']} record');
+    DocumentReference estabDoc = widget.firestore
+        .collection('establishments')
+        .document(establishment.documentID);
+
+    estabDoc.setData(updatedCoOrds).whenComplete(() {
+      print('updated lat & long in ${establishment.name} record');
       Navigator.of(context).pop();
     }).catchError((e) => print(e));
   }
 
   //build list of outlets for current user
-  Future<ListView> _outletTilesList(List<String> userOutletIDs) async {
+  Future<ListView> _outletTilesList(List<String> establishmentIDs) async {
     print('_outletTilesList()');
     var listEntries = <Widget>[];
 
-    if (userOutletIDs.length > 0) {
+    if (establishmentIDs.length > 0) {
       listEntries.add(Container(
         color: AppThemeColors.main[100],
         child: Center(
@@ -208,11 +209,11 @@ class _HomePageState extends State<HomePage> {
 
     var estabsCollection = widget.firestore.collection('establishments');
 
-    for (var ouletId in userOutletIDs) {
-      var estabDoc = estabsCollection.document(ouletId);
+    for (var estabId in establishmentIDs) {
+      var estabDoc = estabsCollection.document(estabId);
       var estabShot = await estabDoc.get();
       if (estabShot != null) {
-        var establishment = Establishment(estabShot.data);
+        var establishment = Establishment(estabShot.documentID, estabShot.data);
         bool notLocated =
             establishment.latitude == null || establishment.longitude == null;
 
@@ -224,7 +225,7 @@ class _HomePageState extends State<HomePage> {
             ),
             title: Text(establishment.name),
             subtitle: Text(notLocated
-                    ? 'Tap to confirm you are at ${establishment.name}\'s location (else leave for when you are)'
+                    ? 'IF you are presently at ${establishment.name}, tap to confirm its location...'
                     : establishment.address
                 //style: TextStyle(fontSize: 10.0),
                 ),
@@ -235,10 +236,13 @@ class _HomePageState extends State<HomePage> {
               if (notLocated) {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => new OutletLocationPage(
-                        _geolocationProvider, estabShot, _onOutletLocated)));
+                        _geolocationProvider,
+                        establishment,
+                        _onOutletLocated)));
               } else {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => OutletHomePage(establishment)));
+                    builder: (context) =>
+                        OutletHomePage(widget.firestore, establishment)));
               }
             }));
       }

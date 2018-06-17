@@ -4,20 +4,22 @@ import 'package:offerz/ui/theme.dart';
 import 'package:offerz/model/establishment.dart';
 import 'package:offerz/widgets/establishmentmap_widget.dart';
 import 'package:offerz/widgets/choicecard_widget.dart';
+import 'package:offerz/widgets/establishmentsettings_widget.dart';
 
 const List<Choice> choices = const <Choice>[
-  const Choice(title: 'Home', icon: Icons.home),
-  const Choice(title: 'Compose an Offer', icon: Icons.loyalty),
+  const Choice(title: 'Home', icon: Icons.location_on),
+  const Choice(title: 'Compose an Offer', icon: Icons.announcement),
   const Choice(title: 'Option 3', icon: Icons.filter_3),
   const Choice(title: 'Option 4', icon: Icons.filter_4),
   const Choice(title: 'Option 5', icon: Icons.filter_5),
   const Choice(title: 'Option 6', icon: Icons.filter_6),
-  const Choice(title: 'Outlet Settings', icon: Icons.settings),
+  const Choice(title: 'Outlet Profile', icon: Icons.settings),
 ];
 
 class OutletHomePage extends StatefulWidget {
-  OutletHomePage(this.establishment);
+  OutletHomePage(this.firestore, this.establishment);
 
+  final Firestore firestore;
   final Establishment establishment;
 
   @override
@@ -31,7 +33,9 @@ class _OutletHomePageState extends State<OutletHomePage> {
     switch (_selectedChoice.title) {
       case 'Home':
         return EstablishmentMapWidget(widget.establishment);
-        break;
+      case 'Outlet Profile':
+        return EstablishmentSettingsWidget(
+            widget.firestore, widget.establishment, outletProfileUpdated);
       default:
         return null;
     }
@@ -40,6 +44,13 @@ class _OutletHomePageState extends State<OutletHomePage> {
   void _select(Choice choice) {
     setState(() {
       _selectedChoice = choice;
+    });
+  }
+
+  //callback activated after settings saved
+  void outletProfileUpdated() {
+    setState(() {
+      _selectedChoice = choices[0];
     });
   }
 
@@ -80,9 +91,8 @@ class _OutletHomePageState extends State<OutletHomePage> {
         ],
       ),
       backgroundColor: AppThemeColors.main[400],
-      //body: EstablishmentMapWidget(widget.establishment),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(1.0),
         child: ChoiceCard(choice: _selectedChoice, cardContent: _cardContent),
       ),
     );

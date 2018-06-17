@@ -2,20 +2,20 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
 import 'package:offerz/special_typedefs.dart';
 import 'package:offerz/ui/theme.dart';
 import 'package:offerz/interface/basegeolocation.dart';
+import 'package:offerz/model/establishment.dart';
 
 class OutletLocationPage extends StatefulWidget {
   OutletLocationPage(
-      this.locationProvider, this.outletInfo, this.onOutletLocationConfirmed);
+      this.locationProvider, this.estabInfo, this.onOutletLocationConfirmed);
 
   final BaseGeolocation locationProvider;
-  final DocumentSnapshot outletInfo;
-  final WithDocumentSnapshotFunction onOutletLocationConfirmed;
+  final Establishment estabInfo;
+  final WithEstablishmentFunction onOutletLocationConfirmed;
 
   @override
   State<StatefulWidget> createState() => new _OutletLocationPageState();
@@ -88,14 +88,12 @@ class _OutletLocationPageState extends State<OutletLocationPage> {
               )),
         ),
         floatingActionButton: FloatingActionButton(
-          tooltip: 'Confirm ${widget.outletInfo.data['name']}\'s location',
+          tooltip: 'Confirm ${widget.estabInfo.name}\'s location',
           child: Icon(Icons.done),
           onPressed: () {
-            widget.outletInfo.data['latitude'] =
-                widget.locationProvider.latitude;
-            widget.outletInfo.data['longitude'] =
-                widget.locationProvider.longitude;
-            widget.onOutletLocationConfirmed(widget.outletInfo);
+            widget.estabInfo.latitude = widget.locationProvider.latitude;
+            widget.estabInfo.longitude = widget.locationProvider.longitude;
+            widget.onOutletLocationConfirmed(widget.estabInfo);
           },
         ),
         body: Stack(
@@ -125,7 +123,7 @@ class _OutletLocationPageState extends State<OutletLocationPage> {
                 decoration:
                     BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
                 child: Text(
-                  'Confirm you\'re at ${widget.outletInfo.data['name']}\'s location',
+                  'Confirm you\'re at ${widget.estabInfo.name}\'s location',
                   style: TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold,

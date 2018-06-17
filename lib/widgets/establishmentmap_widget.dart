@@ -12,7 +12,7 @@ class EstablishmentMapWidget extends StatefulWidget {
 }
 
 class _EstablishmentMapWidgetState extends State<EstablishmentMapWidget> {
-  var mapZoom = 18;
+  var mapZoom = 14;
   var mapType = 'roadmap';
   var mapWidth = 600.0;
   var mapHeight = 900.0;
@@ -44,7 +44,7 @@ class _EstablishmentMapWidgetState extends State<EstablishmentMapWidget> {
         Container(
           padding: const EdgeInsets.all(10.0),
           decoration: BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
-          child: Text('Outlet address: ${widget.outlet.address}',
+          child: Text('${widget.outlet.address}\n${widget.outlet.description}',
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.bold,
@@ -57,7 +57,7 @@ class _EstablishmentMapWidgetState extends State<EstablishmentMapWidget> {
             padding: const EdgeInsets.all(10.0),
             decoration: BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
             child: Text(
-              'Your outlet location is indicated above. (see Outlet Settings to set)',
+              'Offers will be pushed to your patrons\nin this vicinity',
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.bold,
