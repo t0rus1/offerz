@@ -2,6 +2,7 @@ library offerz.globals;
 
 //TODO: TAKE THESE KEYS OUT OF THE SOURCE CODE!!!!
 const String MAPS_STATIC_API_KEY = 'AIzaSyCbXr_UoqYS1Wdt7mf8flN_ns6MCKg6B2U';
+const String MAPS_API_KEY = 'AIzaSyBuKWQhybOht6jp0HnJFP0fT95DQ3iaxk0';
 const String OPEN_CAGE_API_KEY = '783b742dec30474296e32f9db22e9550';
 const String WHAT3_WORDS_API_KEY = 'YL0EZ0MA';
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:offerz/globals.dart' as globals;
 import 'package:offerz/model/establishment.dart';
+import 'package:offerz/ui/theme.dart';
 
 class EstablishmentMapWidget extends StatefulWidget {
   EstablishmentMapWidget(this.outlet);
@@ -44,7 +45,8 @@ class _EstablishmentMapWidgetState extends State<EstablishmentMapWidget> {
         Container(
           padding: const EdgeInsets.all(10.0),
           decoration: BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
-          child: Text('${widget.outlet.address}\n${widget.outlet.description}',
+          child: Text(
+              '${widget.outlet.name} is located as indicated below.\n(see Settings: Establishment Location)',
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.bold,
@@ -53,17 +55,28 @@ class _EstablishmentMapWidgetState extends State<EstablishmentMapWidget> {
         ),
         Positioned(
           bottom: 20.0,
-          child: Container(
-            padding: const EdgeInsets.all(10.0),
-            decoration: BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
-            child: Text(
-              'Offers will be pushed to your patrons\nin this vicinity',
-              style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(20.0),
+                decoration:
+                    BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
+                child: Text(
+                  'Push an offer to your patrons.',
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
               ),
-            ),
+              FloatingActionButton(
+                  tooltip: "Push an offer to your patrons",
+                  child: Icon(Icons.loyalty,
+                      color: AppThemeColors.main[50], size: 30.0),
+                  onPressed: () {}),
+            ],
           ),
         ),
       ],

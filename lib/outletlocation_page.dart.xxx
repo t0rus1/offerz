@@ -4,16 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:offerz/globals.dart' as globals;
+import 'package:offerz/helpers/geolocator.dart';
 import 'package:offerz/special_typedefs.dart';
 import 'package:offerz/ui/theme.dart';
-import 'package:offerz/interface/basegeolocation.dart';
 import 'package:offerz/model/establishment.dart';
 
 class OutletLocationPage extends StatefulWidget {
-  OutletLocationPage(
-      this.locationProvider, this.estabInfo, this.onOutletLocationConfirmed);
+  OutletLocationPage(this.estabInfo, this.onOutletLocationConfirmed);
 
-  final BaseGeolocation locationProvider;
   final Establishment estabInfo;
   final WithEstablishmentFunction onOutletLocationConfirmed;
 
@@ -22,10 +20,10 @@ class OutletLocationPage extends StatefulWidget {
 }
 
 class _OutletLocationPageState extends State<OutletLocationPage> {
+  final Geolocater locationProvider = new Geolocater();
   String placeUrl;
   String mapUrl;
   var locationDetails;
-  //var mapDetails;
   var w3wReverseInfo;
   String w3wMapUrl;
 
@@ -37,15 +35,15 @@ class _OutletLocationPageState extends State<OutletLocationPage> {
   var mapType = 'roadmap';
 
   String googleStaticMapUrl() {
-    return 'https://maps.googleapis.com/maps/api/staticmap?center=${widget.locationProvider.latitude},${widget.locationProvider.longitude}&zoom=$mapZoom&size=$mapSize&maptype=$mapType' +
-        '&markers=color:red|label:X|${widget.locationProvider.latitude},${widget.locationProvider.longitude}' +
+    return 'https://maps.googleapis.com/maps/api/staticmap?center=${locationProvider.latitude},${locationProvider.longitude}&zoom=$mapZoom&size=$mapSize&maptype=$mapType' +
+        '&markers=color:red|label:X|${locationProvider.latitude},${locationProvider.longitude}' +
         '&key=${globals.MAPS_STATIC_API_KEY}';
   }
 
   // obtain a plain 'address' from opencage by providing lat and long
   Future<void> getAddressFromLocation() async {
     var requestUrl =
-        'https://api.opencagedata.com/geocode/v1/json?q=${widget.locationProvider.latitude}+${widget.locationProvider.longitude}&key=${globals.OPEN_CAGE_API_KEY}';
+        'https://api.opencagedata.com/geocode/v1/json?q=${locationProvider.latitude}+${locationProvider.longitude}&key=${globals.OPEN_CAGE_API_KEY}';
     var response = await http.get(requestUrl);
     locationDetails = jsonDecode(response.body);
   }
@@ -68,6 +66,7 @@ class _OutletLocationPageState extends State<OutletLocationPage> {
   @override
   void initState() {
     super.initState();
+
     getAddressFromLocation().whenComplete(() {
       if (locationDetails['total_results'] > 0) {
         setState(() {
@@ -91,8 +90,8 @@ class _OutletLocationPageState extends State<OutletLocationPage> {
           tooltip: 'Confirm ${widget.estabInfo.name}\'s location',
           child: Icon(Icons.done),
           onPressed: () {
-            widget.estabInfo.latitude = widget.locationProvider.latitude;
-            widget.estabInfo.longitude = widget.locationProvider.longitude;
+            widget.estabInfo.latitude = locationProvider.latitude;
+            widget.estabInfo.longitude = locationProvider.longitude;
             widget.onOutletLocationConfirmed(widget.estabInfo);
           },
         ),

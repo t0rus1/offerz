@@ -7,7 +7,7 @@ dependencies:
 
   firebase_auth: ^0.5.11
   cloud_firestore: ^0.7.3 
-  # location_picker: ^0.0.15
+  #location_picker: ^0.0.15
   geolocation: "^0.2.1"
   # opencage_geocoder: "^0.0.5"  
   # geocoder: "^0.0.1"

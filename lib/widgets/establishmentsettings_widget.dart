@@ -41,7 +41,7 @@ class EstablishmentSettingsWidgetState
 
       var establishmentMap = widget.establishment.dataMap;
 
-      estabDoc.setData(establishmentMap).whenComplete(() {
+      estabDoc.setData(establishmentMap, merge: true).whenComplete(() {
         print('updated ${widget.establishment.name} record');
         setState(() {
           _submitButton = buildSubmitButton(true);
@@ -84,6 +84,11 @@ class EstablishmentSettingsWidgetState
         child: Container(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Column(children: [
+              Container(
+                child: Text('Set Name, Description & Product category here'),
+                decoration:
+                    BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
+              ),
               Card(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

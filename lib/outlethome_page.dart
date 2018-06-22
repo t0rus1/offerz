@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:offerz/ui/theme.dart';
@@ -5,15 +7,14 @@ import 'package:offerz/model/establishment.dart';
 import 'package:offerz/widgets/establishmentmap_widget.dart';
 import 'package:offerz/widgets/choicecard_widget.dart';
 import 'package:offerz/widgets/establishmentsettings_widget.dart';
+import 'package:offerz/widgets/outletlocation_widget.dart';
 
 const List<Choice> choices = const <Choice>[
-  const Choice(title: 'Home', icon: Icons.location_on),
-  const Choice(title: 'Compose an Offer', icon: Icons.announcement),
-  const Choice(title: 'Option 3', icon: Icons.filter_3),
-  const Choice(title: 'Option 4', icon: Icons.filter_4),
-  const Choice(title: 'Option 5', icon: Icons.filter_5),
-  const Choice(title: 'Option 6', icon: Icons.filter_6),
-  const Choice(title: 'Outlet Profile', icon: Icons.settings),
+  const Choice(title: 'Home', icon: Icons.home),
+  const Choice(title: 'Setup Regular Menu', icon: Icons.local_pizza),
+  const Choice(
+      title: 'Settings: Establishment Location', icon: Icons.location_on),
+  const Choice(title: 'Settings: Other', icon: Icons.settings),
 ];
 
 class OutletHomePage extends StatefulWidget {
@@ -29,11 +30,27 @@ class OutletHomePage extends StatefulWidget {
 class _OutletHomePageState extends State<OutletHomePage> {
   Choice _selectedChoice = choices[0];
 
+  //sets lat and long in establishment record in firestore
+  Future<void> _onOutletLocationConfirmed(Establishment estab) async {
+    print('outletLocationConfirmed');
+    var estabDoc = widget.firestore
+        .collection('establishments')
+        .document(estab.documentID);
+
+    estabDoc.setData(estab.coOrdsMap, merge: true).whenComplete(() {
+      print('updated lat & long in ${estab.name} record');
+      outletProfileUpdated();
+    }).catchError((e) => print(e));
+  }
+
   Widget get _cardContent {
     switch (_selectedChoice.title) {
       case 'Home':
         return EstablishmentMapWidget(widget.establishment);
-      case 'Outlet Profile':
+      case 'Settings: Establishment Location':
+        return OutletLocationWidget(
+            widget.establishment, _onOutletLocationConfirmed);
+      case 'Settings: Other':
         return EstablishmentSettingsWidget(
             widget.firestore, widget.establishment, outletProfileUpdated);
       default:

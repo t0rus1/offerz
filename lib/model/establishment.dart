@@ -84,6 +84,13 @@ class Establishment {
     };
   }
 
+  Map<String, dynamic> get coOrdsMap {
+    return <String, dynamic>{
+      'latitude': _latitude,
+      'longitude': _longitude,
+    };
+  }
+
   List<Widget> formFields(Widget submitButton) {
     return [
       Utils.padded(
@@ -116,6 +123,7 @@ class Establishment {
       Utils.padded(
           child: new TextFormField(
         key: new Key('address'),
+        enabled: false,
         initialValue: address,
         decoration: new InputDecoration(labelText: 'Street address'),
         autocorrect: false,
@@ -125,11 +133,18 @@ class Establishment {
       Utils.padded(
           child: new TextFormField(
         key: new Key('country'),
+        enabled: false,
         initialValue: country,
         decoration: new InputDecoration(labelText: 'Country'),
         autocorrect: false,
-        validator: (val) => val.isEmpty ? 'Country can\'t be empty.' : null,
-        onSaved: (val) => country = val.trim(),
+      )),
+      Utils.padded(
+          child: new TextFormField(
+        key: new Key('proprietor'),
+        enabled: false,
+        initialValue: proprietor,
+        decoration: new InputDecoration(labelText: 'Proprietor'),
+        autocorrect: false,
       )),
       //submit button with its callback must be provided
       submitButton

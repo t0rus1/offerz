@@ -5,12 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:offerz/globals.dart' as globals;
 import 'package:offerz/model/establishment.dart';
 import 'package:offerz/interface/baseauth.dart';
-import 'package:offerz/interface/basegeolocation.dart';
 import 'package:offerz/ui/theme.dart';
 import 'package:offerz/model/user.dart';
 import 'package:offerz/establishment_page.dart';
-import 'package:offerz/helpers/user_geolocation.dart';
-import 'package:offerz/outletlocation_page.dart';
 import 'package:offerz/outlethome_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -29,9 +26,6 @@ class _HomePageState extends State<HomePage> {
   Widget _drawerHead;
   Widget _establishmentManagementDrawer;
   Widget _establishmentJoinDrawer;
-
-  BaseGeolocation _geolocationProvider =
-      new Geolocater(); // usable once its 'setDeviceLocation' method has been called
 
   Future<User> _getVerifiedUser(String signedInEmail) async {
     print('_getVerifiedUser($signedInEmail)');
@@ -177,18 +171,13 @@ class _HomePageState extends State<HomePage> {
   //it updates the latitude and longitude values in the establishment record
   Future<void> _onOutletLocated(Establishment establishment) async {
     print('_onOutletLocated()');
-    Map<String, dynamic> updatedCoOrds = {
-      'latitude': establishment.latitude,
-      'longitude': establishment.longitude,
-    };
 
-    DocumentReference estabDoc = widget.firestore
+    var estabDoc = widget.firestore
         .collection('establishments')
         .document(establishment.documentID);
 
-    estabDoc.setData(updatedCoOrds).whenComplete(() {
+    estabDoc.setData(establishment.coOrdsMap).whenComplete(() {
       print('updated lat & long in ${establishment.name} record');
-      Navigator.of(context).pop();
     }).catchError((e) => print(e));
   }
 
@@ -225,25 +214,21 @@ class _HomePageState extends State<HomePage> {
             ),
             title: Text(establishment.name),
             subtitle: Text(notLocated
-                    ? 'IF you are presently at ${establishment.name}, tap to confirm its location...'
-                    : establishment.address
-                //style: TextStyle(fontSize: 10.0),
-                ),
+                ? 'not yet located - tap and go to Location settings'
+                : establishment.address),
             dense: true,
             enabled: true,
+            trailing: Icon(
+              notLocated ? Icons.add_alert : Icons.done,
+              color: AppThemeColors.main[900],
+              size: 24.0,
+            ),
             onTap: () {
               print('${establishment.name} tapped');
-              if (notLocated) {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => new OutletLocationPage(
-                        _geolocationProvider,
-                        establishment,
-                        _onOutletLocated)));
-              } else {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        OutletHomePage(widget.firestore, establishment)));
-              }
+              Navigator.of(context).pop();
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) =>
+                      OutletHomePage(widget.firestore, establishment)));
             }));
       }
     }
@@ -325,7 +310,7 @@ class _HomePageState extends State<HomePage> {
 
     print('HomePageState initState()');
 
-    _geolocationProvider.setDeviceLocation();
+    //_geolocationProvider.setDeviceLocation();
 
     _welcome().whenComplete(() {
       _getUserOutletIDs(_verifiedUser.eMail).then((userOutletIds) {
