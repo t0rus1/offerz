@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class Choice {
-  const Choice({this.title, this.icon});
+  const Choice({this.title, this.icon, this.enabled = true});
 
+  final bool enabled;
   final String title;
   final IconData icon;
 }

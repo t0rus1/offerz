@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class Utils {
-
   static Widget padded({Widget child}) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -14,6 +13,4 @@ class Utils {
     assert(inDebugMode = true);
     return inDebugMode;
   }
-
 }
-

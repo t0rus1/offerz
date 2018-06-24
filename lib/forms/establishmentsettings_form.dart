@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:offerz/helpers/utils.dart';
 import 'package:offerz/model/establishment.dart';
 import 'package:offerz/ui/primary_button.dart';
+import 'package:offerz/ui/theme.dart';
 
 class EstablishmentSettingsWidget extends StatefulWidget {
   final Firestore firestore;
@@ -84,11 +86,8 @@ class EstablishmentSettingsWidgetState
         child: Container(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Column(children: [
-              Container(
-                child: Text('Set Name, Description & Product category here'),
-                decoration:
-                    BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
-              ),
+              Text('Set Name, Description & Product category here',
+                  style: AppThemeText.norm14),
               Card(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

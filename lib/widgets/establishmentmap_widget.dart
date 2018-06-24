@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:offerz/globals.dart' as globals;
+import 'package:offerz/helpers/utils.dart';
 import 'package:offerz/model/establishment.dart';
 import 'package:offerz/ui/theme.dart';
 
@@ -32,54 +33,25 @@ class _EstablishmentMapWidgetState extends State<EstablishmentMapWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Stack(
-      children: <Widget>[
-        Container(
-            child: Image.network(
-          googleStaticMapUrl(),
-          width: mapWidth,
-          height: mapHeight,
-          fit: BoxFit.cover,
-        )),
-        Container(
-          padding: const EdgeInsets.all(10.0),
-          decoration: BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
-          child: Text(
-              '${widget.outlet.name} is located as indicated below.\n(see Settings: Establishment Location)',
-              style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              )),
-        ),
-        Positioned(
-          bottom: 20.0,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Container(
-                padding: const EdgeInsets.all(20.0),
-                decoration:
-                    BoxDecoration(color: Color.fromARGB(50, 71, 150, 236)),
-                child: Text(
-                  'Push an offer to your patrons.',
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              FloatingActionButton(
-                  tooltip: "Push an offer to your patrons",
-                  child: Icon(Icons.loyalty,
-                      color: AppThemeColors.main[50], size: 30.0),
-                  onPressed: () {}),
-            ],
-          ),
-        ),
-      ],
-    ));
+    return Stack(alignment: Alignment(1.0, 1.0), children: <Widget>[
+      Container(
+          child: Image.network(
+        googleStaticMapUrl(),
+        width: mapWidth,
+        height: mapHeight,
+        fit: BoxFit.cover,
+      )),
+      Container(
+        color: AppThemeColors.textBackground,
+        child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
+          Text('Push an offer to your patrons nearby',
+              style: AppThemeText.norm14),
+          FloatingActionButton(
+              child: Icon(Icons.loyalty,
+                  color: AppThemeColors.main[50], size: 30.0),
+              onPressed: () {}),
+        ]),
+      ),
+    ]);
   }
 }

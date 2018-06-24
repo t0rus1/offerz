@@ -32,3 +32,10 @@ const String welcomeJoinInstructionsNewSignIn =
         "please opt-in from the menu drawer above and tap 'Join an establishment'";
 const String welcomeCreateInstructionsNewSignIn =
     "plus, if you want to start presenting offers to your own patrons, tap 'Create an establishment'";
+
+const String locationSetWarning =
+    "You have to be physically present at your establishment in order to set its location.\n\n" +
+        "(This is to ensure our establishment owners are truly local)\n\n" +
+        "Fortunately it is only necessary to 'locate' your outlet once." +
+        "If the detected location (which you are about to see) is not currently correct, " +
+        "and you are NOT currently at the premises, please revisit this option later to correct it when you are!";

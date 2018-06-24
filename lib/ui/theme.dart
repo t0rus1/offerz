@@ -28,4 +28,17 @@ class AppThemeColors {
         800: const Color(0xffd34949),
         900: const Color(0xffcb3838) //darkest
       });
+
+  //semi transparent panels with text
+  static const Color textBackground = const Color.fromARGB(50, 71, 150, 236);
+  static const Color textForeground = Colors.black87;
+}
+
+class AppThemeText {
+  AppThemeText._();
+
+  static const TextStyle norm14 = const TextStyle(
+      fontSize: 14.0,
+      fontWeight: FontWeight.normal,
+      color: AppThemeColors.textForeground);
 }

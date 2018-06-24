@@ -99,10 +99,10 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 CircleAvatar(
                   backgroundColor: AppThemeColors.main[900],
-                  radius: 40.0,
+                  radius: 20.0,
                   child: Icon(
                     Icons.loyalty,
-                    size: 60.0,
+                    size: 100.0,
                     color: AppThemeColors.main[50],
                   ),
                 ),
@@ -213,9 +213,8 @@ class _HomePageState extends State<HomePage> {
               size: 24.0,
             ),
             title: Text(establishment.name),
-            subtitle: Text(notLocated
-                ? 'not yet located - tap and go to Location settings'
-                : establishment.address),
+            subtitle:
+                Text(notLocated ? 'not yet located' : establishment.address),
             dense: true,
             enabled: true,
             trailing: Icon(
