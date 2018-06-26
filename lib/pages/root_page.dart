@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
 import 'package:offerz/interface/baseauth.dart';
-import 'package:offerz/login_page.dart';
-import 'package:offerz/home_page.dart';
+import 'package:offerz/pages/login_page.dart';
+import 'package:offerz/pages/home_page.dart';
 
 class RootPage extends StatefulWidget {
   final BaseAuth auth;
@@ -87,4 +87,3 @@ class _RootPageState extends State<RootPage> {
     }
   }
 }
-

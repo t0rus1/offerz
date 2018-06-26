@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
-import 'package:offerz/root_page.dart';
+import 'package:offerz/pages/root_page.dart';
 import 'package:offerz/auth.dart';
 import 'package:offerz/ui/theme.dart';
 

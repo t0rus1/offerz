@@ -11,7 +11,7 @@ import 'package:offerz/model/regularmenuitem.dart';
 import 'package:offerz/widgets/establishmentmap_widget.dart';
 import 'package:offerz/widgets/choicecard_widget.dart';
 import 'package:offerz/widgets/outletlocation_widget.dart';
-import 'package:offerz/widgets/regularmenu_widget.dart';
+import 'package:offerz/widgets/regularmenulist_widget.dart';
 
 import 'package:offerz/forms/regularmenuitem_form.dart';
 import 'package:offerz/forms/establishmentsettings_form.dart';
@@ -43,13 +43,13 @@ class _OutletHomePageState extends State<OutletHomePage> {
       case 'Home':
         return EstablishmentMapWidget(widget.establishment);
       case 'Regular Menu': // shows establishment menu
-        return RegularMenuWidget(widget.firestore, widget.establishment,
+        return RegularMenuListWidget(widget.firestore, widget.establishment,
             _onNewRegularMenuItemWanted);
       case 'Set Location': // allows owner to locate his outlet
         return OutletLocationWidget(
             widget.establishment, _onOutletLocationConfirmed);
       case 'Other Settings': // form to manage outlet name, description etc
-        return EstablishmentSettingsWidget(
+        return EstablishmentSettingsForm(
             widget.firestore, widget.establishment, outletProfileUpdated);
 
       // this option does not appear in the menu but is rather invoked by
@@ -57,7 +57,7 @@ class _OutletHomePageState extends State<OutletHomePage> {
       //when viewing the 'Regular Menu' (see above)
       case '__newRegularMenuItemWanted': // form for a new menu item
         _regularMenuItem = RegularMenuItem('new', new Map<String, dynamic>());
-        return RegularMenuItemWidget(widget.firestore, widget.establishment,
+        return RegularMenuItemForm(widget.firestore, widget.establishment,
             _regularMenuItem, _onRegularMenuItemCompleted);
 
       default:

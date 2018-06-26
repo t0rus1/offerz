@@ -4,3 +4,4 @@ import 'package:offerz/model/establishment.dart';
 
 typedef Future<void> WithEstablishmentFunction(Establishment estabmnt);
 typedef void WithLocationResult(LocationResult result);
+typedef Future<Null> NullFutureCallback();

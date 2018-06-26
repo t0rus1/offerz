@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:offerz/globals.dart' as globals;
-import 'package:offerz/helpers/utils.dart';
 import 'package:offerz/model/establishment.dart';
 import 'package:offerz/ui/theme.dart';
 
@@ -44,8 +43,7 @@ class _EstablishmentMapWidgetState extends State<EstablishmentMapWidget> {
       Container(
         color: AppThemeColors.textBackground,
         child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-          Text('Push an offer to your patrons nearby',
-              style: AppThemeText.norm14),
+          Text('Push an offer to patrons nearby', style: AppThemeText.norm14),
           FloatingActionButton(
               child: Icon(Icons.loyalty,
                   color: AppThemeColors.main[50], size: 30.0),

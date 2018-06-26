@@ -5,12 +5,12 @@ import 'package:offerz/model/establishment.dart';
 import 'package:offerz/ui/primary_button.dart';
 import 'package:offerz/ui/theme.dart';
 
-class EstablishmentSettingsWidget extends StatefulWidget {
+class EstablishmentSettingsForm extends StatefulWidget {
   final Firestore firestore;
   final Establishment establishment;
   final VoidCallback onCompleted;
 
-  EstablishmentSettingsWidget(
+  EstablishmentSettingsForm(
       this.firestore, this.establishment, this.onCompleted);
 
   @override
@@ -18,7 +18,7 @@ class EstablishmentSettingsWidget extends StatefulWidget {
 }
 
 class EstablishmentSettingsWidgetState
-    extends State<EstablishmentSettingsWidget> {
+    extends State<EstablishmentSettingsForm> {
   static final formKey = new GlobalKey<FormState>();
   Widget _submitButton;
 

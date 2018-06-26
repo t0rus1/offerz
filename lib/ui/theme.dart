@@ -41,4 +41,24 @@ class AppThemeText {
       fontSize: 14.0,
       fontWeight: FontWeight.normal,
       color: AppThemeColors.textForeground);
+
+  static const TextStyle light14 = const TextStyle(
+      fontSize: 14.0,
+      fontWeight: FontWeight.w300,
+      color: AppThemeColors.textForeground);
+
+  static const TextStyle informOK14 = const TextStyle(
+    fontSize: 14.0,
+    fontWeight: FontWeight.bold,
+    color: Colors.black87,
+  );
+
+  static const TextStyle informOK20 = const TextStyle(
+    fontSize: 20.0,
+    fontWeight: FontWeight.bold,
+    color: Colors.black87,
+  );
+
+  static const TextStyle itemPrice20 = const TextStyle(
+      fontSize: 20.0, fontWeight: FontWeight.w800, color: Colors.redAccent);
 }

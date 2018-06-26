@@ -39,3 +39,5 @@ const String locationSetWarning =
         "Fortunately it is only necessary to 'locate' your outlet once." +
         "If the detected location (which you are about to see) is not currently correct, " +
         "and you are NOT currently at the premises, please revisit this option later to correct it when you are!";
+
+const String toBeDetermined = 'to be determined';

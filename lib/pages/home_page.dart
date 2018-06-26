@@ -7,8 +7,8 @@ import 'package:offerz/model/establishment.dart';
 import 'package:offerz/interface/baseauth.dart';
 import 'package:offerz/ui/theme.dart';
 import 'package:offerz/model/user.dart';
-import 'package:offerz/establishment_page.dart';
-import 'package:offerz/outlethome_page.dart';
+import 'package:offerz/forms/establishment_form.dart';
+import 'package:offerz/pages/outlethome_page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({this.auth, this.onSignOut, this.firestore});
