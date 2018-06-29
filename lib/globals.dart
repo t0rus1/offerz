@@ -36,8 +36,8 @@ const String welcomeCreateInstructionsNewSignIn =
 const String locationSetWarning =
     "You have to be physically present at your establishment in order to set its location.\n\n" +
         "(This is to ensure our establishment owners are truly local)\n\n" +
-        "Fortunately it is only necessary to 'locate' your outlet once." +
-        "If the detected location (which you are about to see) is not currently correct, " +
-        "and you are NOT currently at the premises, please revisit this option later to correct it when you are!";
+        "Fortunately it is only necessary to 'locate' your outlet once.\n\n" +
+        "If the detected location (which you are about to see) is correct, please SET it as the establishment's location.\n\n" +
+        "If its NOT CORRECT, and you are NOT currently at the premises, please revisit this option LATER to correct it when you are!";
 
 const String toBeDetermined = 'to be determined';

@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
-import 'package:offerz/model/establishment.dart';
+import 'package:offerz/model/establishment_model.dart';
 import 'package:offerz/interface/baseauth.dart';
 import 'package:offerz/ui/theme.dart';
-import 'package:offerz/model/user.dart';
+import 'package:offerz/model/user_model.dart';
 import 'package:offerz/forms/establishment_form.dart';
-import 'package:offerz/pages/outlethome_page.dart';
+import 'package:offerz/pages/establishment_home_page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({this.auth, this.onSignOut, this.firestore});
@@ -169,7 +169,7 @@ class _HomePageState extends State<HomePage> {
 
   //this call back is invoked when user confirms his outlet's location
   //it updates the latitude and longitude values in the establishment record
-  Future<void> _onOutletLocated(Establishment establishment) async {
+  Future<void> _onOutletLocated(EstablishmentModel establishment) async {
     print('_onOutletLocated()');
 
     var estabDoc = widget.firestore
@@ -202,7 +202,8 @@ class _HomePageState extends State<HomePage> {
       var estabDoc = estabsCollection.document(estabId);
       var estabShot = await estabDoc.get();
       if (estabShot != null) {
-        var establishment = Establishment(estabShot.documentID, estabShot.data);
+        var establishment =
+            EstablishmentModel(estabShot.documentID, estabShot.data);
         bool notLocated =
             establishment.latitude == null || establishment.longitude == null;
 
@@ -227,7 +228,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.of(context).pop();
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) =>
-                      OutletHomePage(widget.firestore, establishment)));
+                      EstablishmentHomePage(widget.firestore, establishment)));
             }));
       }
     }

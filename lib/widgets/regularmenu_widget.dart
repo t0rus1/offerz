@@ -1,22 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:offerz/model/establishment.dart';
-import 'package:offerz/model/menulist.dart';
+import 'package:offerz/model/establishment_model.dart';
+import 'package:offerz/special_typedefs.dart';
+import 'package:offerz/widgets/regularmenu_stream_widget.dart';
 import 'package:offerz/ui/theme.dart';
 
-class RegularMenuListWidget extends StatefulWidget {
+class RegularMenuWidget extends StatefulWidget {
   final Firestore firestore;
-  final Establishment establishment;
+  final EstablishmentModel establishment;
   final VoidCallback onNewItemWanted;
+  final NullFutureCallbackWithString onEditItemWanted;
 
-  RegularMenuListWidget(
-      this.firestore, this.establishment, this.onNewItemWanted);
+  RegularMenuWidget(this.firestore, this.establishment, this.onNewItemWanted,
+      this.onEditItemWanted);
 
   @override
   _RegularMenuState createState() => _RegularMenuState();
 }
 
-class _RegularMenuState extends State<RegularMenuListWidget> {
+class _RegularMenuState extends State<RegularMenuWidget> {
   @override
   void initState() {
     // TODO: implement initState
@@ -29,13 +31,14 @@ class _RegularMenuState extends State<RegularMenuListWidget> {
       child: Stack(
         alignment: Alignment(1.0, 1.0),
         children: <Widget>[
-          MenuList(widget.establishment),
+          RegularMenuStreamWidget(
+              widget.establishment, widget.onEditItemWanted),
           Container(
-            color: AppThemeColors.textBackground,
+            color: AppThemeColors.textBackgroundMoreOpaque,
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Text('Add item', style: AppThemeText.norm14),
+                  Text('Add an item to the menu', style: AppThemeText.norm14),
                   FloatingActionButton(
                       child: Icon(Icons.add,
                           color: AppThemeColors.main[50], size: 30.0),

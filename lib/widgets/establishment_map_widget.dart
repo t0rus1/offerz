@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:offerz/globals.dart' as globals;
-import 'package:offerz/model/establishment.dart';
+import 'package:offerz/model/establishment_model.dart';
 import 'package:offerz/ui/theme.dart';
 
 class EstablishmentMapWidget extends StatefulWidget {
   EstablishmentMapWidget(this.outlet);
 
-  final Establishment outlet;
+  final EstablishmentModel outlet;
 
   @override
   State<StatefulWidget> createState() => new _EstablishmentMapWidgetState();

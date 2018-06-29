@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:offerz/globals.dart' as globals;
 import 'package:offerz/ui/theme.dart';
 import 'package:offerz/ui/primary_button.dart';
-import 'package:offerz/model/user.dart';
-import 'package:offerz/model/establishment.dart';
+import 'package:offerz/model/user_model.dart';
+import 'package:offerz/model/establishment_model.dart';
 
 class EstablishmentPage extends StatefulWidget {
   EstablishmentPage({Key key, this.user, this.firestore}) : super(key: key);
@@ -23,7 +23,8 @@ class _EstablishmentPageState extends State<EstablishmentPage> {
 
   //the form will hydrate this establishment object properly
   static final emptyEstablishment = Map<String, dynamic>();
-  Establishment _establishment = Establishment(null, emptyEstablishment);
+  EstablishmentModel _establishment =
+      EstablishmentModel(null, emptyEstablishment);
 
   int _saveCount = 0;
 

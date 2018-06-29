@@ -5,35 +5,36 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/ui/theme.dart';
 
-import 'package:offerz/model/establishment.dart';
-import 'package:offerz/model/regularmenuitem.dart';
+import 'package:offerz/model/establishment_model.dart';
+import 'package:offerz/model/regularmenuitem_model.dart';
 
-import 'package:offerz/widgets/establishmentmap_widget.dart';
+import 'package:offerz/widgets/establishment_map_widget.dart';
 import 'package:offerz/widgets/choicecard_widget.dart';
-import 'package:offerz/widgets/outletlocation_widget.dart';
-import 'package:offerz/widgets/regularmenulist_widget.dart';
+import 'package:offerz/widgets/establishment_location_widget.dart';
+import 'package:offerz/widgets/regularmenu_widget.dart';
 
 import 'package:offerz/forms/regularmenuitem_form.dart';
-import 'package:offerz/forms/establishmentsettings_form.dart';
+import 'package:offerz/forms/establishment_settings_form.dart';
 
-class OutletHomePage extends StatefulWidget {
-  OutletHomePage(this.firestore, this.establishment);
+class EstablishmentHomePage extends StatefulWidget {
+  EstablishmentHomePage(this.firestore, this.establishment);
 
   final Firestore firestore;
-  final Establishment establishment;
+  final EstablishmentModel establishment;
 
   @override
   State<StatefulWidget> createState() => new _OutletHomePageState();
 }
 
-class _OutletHomePageState extends State<OutletHomePage> {
+class _OutletHomePageState extends State<EstablishmentHomePage> {
   Choice _selectedChoice = choices[0];
 
-  RegularMenuItem _regularMenuItem;
+  RegularMenuItemModel _regularMenuItem;
+  String _targetItemID;
 
   static const List<Choice> choices = const <Choice>[
-    const Choice(title: 'Home', icon: Icons.home),
-    const Choice(title: 'Regular Menu', icon: Icons.fastfood),
+    const Choice(title: 'Home', icon: Icons.share),
+    const Choice(title: 'Regular Menu', icon: Icons.description),
     const Choice(title: 'Set Location', icon: Icons.location_on),
     const Choice(title: 'Other Settings', icon: Icons.settings),
   ];
@@ -43,10 +44,10 @@ class _OutletHomePageState extends State<OutletHomePage> {
       case 'Home':
         return EstablishmentMapWidget(widget.establishment);
       case 'Regular Menu': // shows establishment menu
-        return RegularMenuListWidget(widget.firestore, widget.establishment,
-            _onNewRegularMenuItemWanted);
+        return RegularMenuWidget(widget.firestore, widget.establishment,
+            _onNewRegularMenuItemWanted, _onEditRegularMenuItemWanted);
       case 'Set Location': // allows owner to locate his outlet
-        return OutletLocationWidget(
+        return EstablishmentLocationWidget(
             widget.establishment, _onOutletLocationConfirmed);
       case 'Other Settings': // form to manage outlet name, description etc
         return EstablishmentSettingsForm(
@@ -56,9 +57,19 @@ class _OutletHomePageState extends State<OutletHomePage> {
       //the action of the user wanting to add a new regularMenuItem when
       //when viewing the 'Regular Menu' (see above)
       case '__newRegularMenuItemWanted': // form for a new menu item
-        _regularMenuItem = RegularMenuItem('new', new Map<String, dynamic>());
+        _regularMenuItem =
+            RegularMenuItemModel('new', new Map<String, dynamic>());
         return RegularMenuItemForm(widget.firestore, widget.establishment,
-            _regularMenuItem, _onRegularMenuItemCompleted);
+            _regularMenuItem, _onRegularMenuItemCompleted, false);
+
+      // this option does not appear in the menu but is rather invoked by
+      //the action of the user wanting to edit an existing regularMenuItem when
+      //when viewing the 'Regular Menu' (see above)
+      case '__editRegularMenuItemWanted': // form to edit an existing menu item
+        //instantiate an empty regularmenu (except for documentID field) item
+        //the form will detect that an 'edit' is required
+        return RegularMenuItemForm(widget.firestore, widget.establishment,
+            _regularMenuItem, _onRegularMenuItemCompleted, true);
 
       default:
         return null;
@@ -66,7 +77,7 @@ class _OutletHomePageState extends State<OutletHomePage> {
   }
 
   //sets lat and long in establishment record in firestore
-  Future<void> _onOutletLocationConfirmed(Establishment estab) async {
+  Future<void> _onOutletLocationConfirmed(EstablishmentModel estab) async {
     print('outletLocationConfirmed');
     var estabDoc = widget.firestore
         .collection('establishments')
@@ -78,11 +89,39 @@ class _OutletHomePageState extends State<OutletHomePage> {
     }).catchError((e) => print(e));
   }
 
+  //user wants to create a new menu item
   _onNewRegularMenuItemWanted() {
     print('_onNewRegularMenuItemWanted');
     setState(() {
       //construct a 'fake' choice to get new card showing form fields for a new menu item
       _selectedChoice = Choice(title: '__newRegularMenuItemWanted');
+    });
+  }
+
+  //load and return a menu item for editing
+  Future<RegularMenuItemModel> loadMenuItemForEdit(String itemID) async {
+    var estabDoc = widget.firestore
+        .collection('establishments')
+        .document(widget.establishment.documentID);
+
+    var menuItemDoc = estabDoc.collection('menu').document(itemID);
+
+    var menuShot = await menuItemDoc.get();
+    print(
+        'loadMenuItemForEdit ${menuShot.documentID} name: ${menuShot.data['name']}');
+    return RegularMenuItemModel(menuShot.documentID, menuShot.data);
+  }
+
+  //user wants to edit an existing menu item
+  Future<Null> _onEditRegularMenuItemWanted(String targetItemID) async {
+    print('_onEditRegularMenuItemWanted for item $targetItemID');
+    loadMenuItemForEdit(targetItemID).then((loadedItem) {
+      setState(() {
+        //construct a 'fake' choice to get a card showing form fields to edit menu item
+        _regularMenuItem = loadedItem;
+        _targetItemID = targetItemID;
+        _selectedChoice = Choice(title: '__editRegularMenuItemWanted');
+      });
     });
   }
 
@@ -123,12 +162,14 @@ class _OutletHomePageState extends State<OutletHomePage> {
             //iconSize: 32.0,
             color: AppThemeColors.main[50],
             onPressed: () => _select(choices[0]),
+            tooltip: 'Share an offer',
           ),
           IconButton(
             icon: Icon(choices[1].icon),
             //iconSize: 32.0,
             color: AppThemeColors.main[50],
             onPressed: () => _select(choices[1]),
+            tooltip: 'manage the menu',
           ),
           // overflow menu
           PopupMenuButton<Choice>(
@@ -144,7 +185,7 @@ class _OutletHomePageState extends State<OutletHomePage> {
       ),
       backgroundColor: AppThemeColors.main[400],
       body: Padding(
-        padding: const EdgeInsets.all(1.0),
+        padding: const EdgeInsets.only(),
         child: ChoiceCard(choice: _selectedChoice, cardContent: _cardContent),
       ),
     );

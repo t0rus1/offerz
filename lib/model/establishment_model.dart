@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:offerz/helpers/utils.dart';
 
-class Establishment {
+class EstablishmentModel {
   //constructor allows creation off a passed in DocumentSnapshot
-  Establishment(String documentID, Map<String, dynamic> fields) {
+  EstablishmentModel(String documentID, Map<String, dynamic> fields) {
     this.documentID = documentID; // can use to find establishment
     address = fields['address'] ?? '';
     country = fields['country'] ?? '';

@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:offerz/helpers/utils.dart';
-import 'package:offerz/model/establishment.dart';
+import 'package:offerz/model/establishment_model.dart';
 import 'package:offerz/ui/primary_button.dart';
 import 'package:offerz/ui/theme.dart';
 
 class EstablishmentSettingsForm extends StatefulWidget {
   final Firestore firestore;
-  final Establishment establishment;
+  final EstablishmentModel establishment;
   final VoidCallback onCompleted;
 
   EstablishmentSettingsForm(
