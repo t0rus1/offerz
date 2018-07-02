@@ -32,7 +32,7 @@ class _EstablishmentMapWidgetState extends State<EstablishmentMapWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(alignment: Alignment(1.0, 1.0), children: <Widget>[
+    return Stack(alignment: Alignment(0.0, 0.95), children: <Widget>[
       Container(
           child: Image.network(
         googleStaticMapUrl(),
@@ -41,11 +41,11 @@ class _EstablishmentMapWidgetState extends State<EstablishmentMapWidget> {
         fit: BoxFit.cover,
       )),
       Container(
-        color: AppThemeColors.textBackground,
-        child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-          Text('Push an offer to patrons nearby', style: AppThemeText.norm14),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
           FloatingActionButton(
-              child: Icon(Icons.loyalty,
+              tooltip: 'push an offer to patrons in the area',
+              child: Icon(Icons.add_alert,
                   color: AppThemeColors.main[50], size: 30.0),
               onPressed: () {}),
         ]),

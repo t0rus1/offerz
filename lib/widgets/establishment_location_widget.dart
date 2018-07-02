@@ -26,6 +26,7 @@ class _OutletLocationWidgetState extends State<EstablishmentLocationWidget> {
   String mapUrl;
   var locationDetails;
   var locationComponents;
+  var locationAnnotations;
   var w3wReverseInfo;
   String w3wMapUrl;
   String _locationMessage = "Acquiring location...";
@@ -43,18 +44,43 @@ class _OutletLocationWidgetState extends State<EstablishmentLocationWidget> {
   }
 
   // obtain a plain 'address' from opencage by providing lat and long
+  // see https://opencagedata.com/api#reverse-resp
   Future<void> getAddressFromLocation() async {
     var requestUrl =
         'https://api.opencagedata.com/geocode/v1/json?q=${locationProvider.latitude}+${locationProvider.longitude}&key=${globals.OPEN_CAGE_API_KEY}';
     var response = await http.get(requestUrl);
     locationDetails = jsonDecode(response.body);
+
     locationComponents = locationDetails['results'][0]['components'];
+    // print('locationComponents');
+    // print(JsonEncoder.withIndent("  ").convert(locationComponents));
+    // print('\n');
+
+    locationAnnotations = locationDetails['results'][0]['annotations'];
+    // print('locationAnnotations');
+    // print(JsonEncoder.withIndent("  ").convert(locationAnnotations));
+    // print('\n');
   }
 
   void warningAcknowledged() {
     setState(() {
       warningShown = true;
     });
+  }
+
+  String updateEstablishment() {
+    widget.estabInfo.address =
+        '${locationComponents['road']},${locationComponents['suburb']},${locationComponents['town']}, ${locationComponents['state']}';
+
+    // opencage does not have 'city', so use 'county' instead ??
+    widget.estabInfo.city = locationComponents['county'];
+    widget.estabInfo.town = locationComponents['town'];
+    widget.estabInfo.country = locationComponents['country'];
+
+    widget.estabInfo.currency = locationAnnotations['currency']['symbol'];
+    widget.estabInfo.what3words = locationAnnotations['what3words']['words'];
+
+    return widget.estabInfo.address;
   }
 
   @override
@@ -65,9 +91,7 @@ class _OutletLocationWidgetState extends State<EstablishmentLocationWidget> {
         getAddressFromLocation().whenComplete(() {
           if (locationDetails['total_results'] > 0) {
             setState(() {
-              widget.estabInfo.address =
-                  '${locationComponents['road']},${locationComponents['town']},${locationComponents['state']}';
-              _locationMessage = widget.estabInfo.address;
+              _locationMessage = updateEstablishment();
             });
           }
         });

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:offerz/globals.dart' as globals;
+import 'package:offerz/helpers/utils.dart';
 import 'package:offerz/model/establishment_model.dart';
 import 'package:offerz/interface/baseauth.dart';
 import 'package:offerz/ui/theme.dart';
@@ -26,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   Widget _drawerHead;
   Widget _establishmentManagementDrawer;
   Widget _establishmentJoinDrawer;
+  bool _starting = true;
 
   Future<User> _getVerifiedUser(String signedInEmail) async {
     print('_getVerifiedUser($signedInEmail)');
@@ -94,42 +96,13 @@ class _HomePageState extends State<HomePage> {
       child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Stack(
-              //alignment: const Alignment(20.0, 20.0),
-              children: <Widget>[
-                CircleAvatar(
-                  backgroundColor: AppThemeColors.main[900],
-                  radius: 20.0,
-                  child: Icon(
-                    Icons.loyalty,
-                    size: 100.0,
-                    color: AppThemeColors.main[50],
-                  ),
-                ),
-              ],
-            ),
-            Text('Welcome!',
-                style: TextStyle(
-                  fontSize: 24.0,
-                )),
-            Text(
-              globals.welcomeBlurbNewSignIn,
-              style: TextStyle(
-                fontSize: 20.0,
-              ),
-            ),
-            Text(
-              globals.welcomeJoinInstructionsNewSignIn,
-              style: TextStyle(
-                fontSize: 16.0,
-              ),
-            ),
-            Text(
-              globals.welcomeCreateInstructionsNewSignIn,
-              style: TextStyle(
-                fontSize: 16.0,
-              ),
-            ),
+            Utils.logoAvatar(20.0),
+            Text('Welcome!', style: AppThemeText.norm24),
+            Text(globals.welcomeBlurbNewSignIn, style: AppThemeText.norm20),
+            Text(globals.welcomeJoinInstructionsNewSignIn,
+                style: AppThemeText.norm16),
+            Text(globals.welcomeCreateInstructionsNewSignIn,
+                style: AppThemeText.norm16),
           ]),
     ));
   }
@@ -176,8 +149,8 @@ class _HomePageState extends State<HomePage> {
         .collection('establishments')
         .document(establishment.documentID);
 
-    estabDoc.setData(establishment.coOrdsMap).whenComplete(() {
-      print('updated lat & long in ${establishment.name} record');
+    estabDoc.setData(establishment.localizationMap).whenComplete(() {
+      print('updated localization in ${establishment.name} record');
     }).catchError((e) => print(e));
   }
 
@@ -190,8 +163,8 @@ class _HomePageState extends State<HomePage> {
       listEntries.add(Container(
         color: AppThemeColors.main[100],
         child: Center(
-            child:
-                Text('Your Establishments', style: TextStyle(fontSize: 20.0))),
+            child: Text('Your Own Establishments',
+                style: TextStyle(fontSize: 20.0))),
         height: 40.0,
       ));
     }
@@ -272,8 +245,8 @@ class _HomePageState extends State<HomePage> {
           color: AppThemeColors.main[900],
           size: 30.0,
         ),
-        title: Text('Join an establishment'),
-        subtitle: Text('in order to receive offers...'),
+        title: Text('nearby establishments'),
+        subtitle: Text('for you to link with...'),
         onTap: () {
           print('join establishment tapped');
           Navigator.pop(context);
@@ -310,12 +283,11 @@ class _HomePageState extends State<HomePage> {
 
     print('HomePageState initState()');
 
-    //_geolocationProvider.setDeviceLocation();
-
     _welcome().whenComplete(() {
       _getUserOutletIDs(_verifiedUser.eMail).then((userOutletIds) {
         _estabMngmntDrawer(userOutletIds).then((mngmntDrawer) {
           setState(() {
+            _starting = false;
             _drawerHead = _drawerHeader();
             _establishmentManagementDrawer = mngmntDrawer;
             _establishmentJoinDrawer = _estabJoinDrawer();
@@ -350,6 +322,8 @@ class _HomePageState extends State<HomePage> {
           _establishmentManagementDrawer,
         ])),
         backgroundColor: AppThemeColors.main[400],
-        body: Center(child: _welcomeWidget));
+        body: _starting
+            ? Utils.waitingIndicator('')
+            : Center(child: _welcomeWidget));
   }
 }

@@ -4,15 +4,19 @@ import 'package:offerz/helpers/utils.dart';
 class EstablishmentModel {
   //constructor allows creation off a passed in DocumentSnapshot
   EstablishmentModel(String documentID, Map<String, dynamic> fields) {
-    this.documentID = documentID; // can use to find establishment
-    address = fields['address'] ?? '';
-    country = fields['country'] ?? '';
-    description = fields['description'] ?? '';
-    latitude = fields['latitude'] ?? '';
-    longitude = fields['longitude'] ?? '';
-    name = fields['name'] ?? '';
-    productCategory = fields['product-category'] ?? '';
-    proprietor = fields['proprietor'] ?? '';
+    _documentID = documentID; // can use to find establishment
+    _address = fields['address'] ?? '';
+    _town = fields['town'] ?? '';
+    _city = fields['city'] ?? '';
+    _country = fields['country'] ?? '';
+    _description = fields['description'] ?? '';
+    _latitude = fields['latitude'] ?? '';
+    _longitude = fields['longitude'] ?? '';
+    _name = fields['name'] ?? '';
+    _productCategory = fields['product-category'] ?? '';
+    _proprietor = fields['proprietor'] ?? '';
+    _what3words = fields['what3words'] ?? '';
+    _currency = fields['currency'] ?? '';
   }
 
   //corresponds to the documentID in the establishments collection
@@ -27,6 +31,18 @@ class EstablishmentModel {
   String get address => _address;
   set address(String address) {
     _address = address;
+  }
+
+  String _town;
+  String get town => _town;
+  set town(String town) {
+    _town = town;
+  }
+
+  String _city;
+  String get city => _city;
+  set city(String city) {
+    _city = city;
   }
 
   String _country;
@@ -71,9 +87,23 @@ class EstablishmentModel {
     _proprietor = proprietor;
   }
 
+  String _what3words;
+  String get what3words => _what3words;
+  set what3words(String what3words) {
+    _what3words = what3words;
+  }
+
+  String _currency;
+  String get currency => _currency;
+  set currency(String currency) {
+    _currency = currency;
+  }
+
   Map<String, dynamic> get dataMap {
     return <String, dynamic>{
       'address': _address,
+      'town': _town,
+      'city': _city,
       'country': _country,
       'description': _description,
       'latitude': _latitude,
@@ -81,13 +111,19 @@ class EstablishmentModel {
       'name': _name,
       'product-category': _productCategory,
       'proprietor': _proprietor,
+      'what3words': _what3words,
+      'currency': _currency,
     };
   }
 
-  Map<String, dynamic> get coOrdsMap {
+  Map<String, dynamic> get localizationMap {
     return <String, dynamic>{
       'latitude': _latitude,
       'longitude': _longitude,
+      'town': _town,
+      'city': _city,
+      'what3words': _what3words,
+      'currency': _currency,
     };
   }
 
@@ -124,6 +160,7 @@ class EstablishmentModel {
           child: new TextFormField(
         key: new Key('address'),
         enabled: false,
+        maxLines: 3,
         initialValue: address,
         decoration: new InputDecoration(labelText: 'Street address'),
         autocorrect: false,
@@ -132,11 +169,41 @@ class EstablishmentModel {
       )),
       Utils.padded(
           child: new TextFormField(
+        key: new Key('town'),
+        enabled: false,
+        initialValue: town,
+        decoration: new InputDecoration(labelText: 'Town'),
+        autocorrect: false,
+        validator: (val) => null,
+        onSaved: (val) => town = val.trim(),
+      )),
+      Utils.padded(
+          child: new TextFormField(
+        key: new Key('city'),
+        enabled: false,
+        initialValue: city,
+        decoration: new InputDecoration(labelText: 'City'),
+        autocorrect: false,
+        validator: (val) => null,
+        onSaved: (val) => city = val.trim(),
+      )),
+      Utils.padded(
+          child: new TextFormField(
         key: new Key('country'),
         enabled: false,
         initialValue: country,
         decoration: new InputDecoration(labelText: 'Country'),
         autocorrect: false,
+      )),
+      Utils.padded(
+          child: new TextFormField(
+        key: new Key('what3words'),
+        enabled: false,
+        initialValue: what3words,
+        decoration: new InputDecoration(labelText: 'what3words'),
+        autocorrect: false,
+        validator: (val) => null,
+        onSaved: (val) => what3words = val.trim(),
       )),
       Utils.padded(
           child: new TextFormField(

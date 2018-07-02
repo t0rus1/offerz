@@ -10,7 +10,9 @@ import 'package:offerz/widgets/regularmenu_streamtile_widget.dart';
 class RegularMenuStreamWidget extends StatelessWidget {
   final EstablishmentModel establishment;
   final NullFutureCallbackWithString onEditMenuItemWanted;
-  RegularMenuStreamWidget(this.establishment, this.onEditMenuItemWanted);
+  final NullFutureCallbackWithString onDeleteMenuItemWanted;
+  RegularMenuStreamWidget(this.establishment, this.onEditMenuItemWanted,
+      this.onDeleteMenuItemWanted);
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,8 @@ class RegularMenuStreamWidget extends StatelessWidget {
         } else {
           return ListView(
             children: snapshot.data.documents.map((DocumentSnapshot document) {
-              return regularMenuStreamTile(document, onEditMenuItemWanted);
+              return regularMenuStreamTile(establishment, document,
+                  onEditMenuItemWanted, onDeleteMenuItemWanted);
             }).toList(),
           );
         }

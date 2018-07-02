@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:offerz/helpers/utils.dart';
 
 import 'package:offerz/model/establishment_model.dart';
 import 'package:offerz/model/regularmenuitem_model.dart';
@@ -56,20 +57,24 @@ class _RegularMenuItemWidgetState extends State<RegularMenuItemForm> {
 
     //see https://steemit.com/utopian-io/@tensor/using-firestore-storage-and-caching-files-inside-of-dart-s-flutter-framework
     if (_image != null && _image.path != null && _image.path.isNotEmpty) {
+      print('_image.path: ${_image.path}');
       ByteData bytes = await rootBundle.load(_image.path);
 
-      //transfer file from its initial location to systemTemp folder (where it is cached)
+      //transfer file from its initial location to systemTemp folder (where it is temporarily cached)
+      var tmpfileName = "${Random().nextInt(100000)}";
       Directory tmpDir = Directory.systemTemp;
-      var fileName = "${Random().nextInt(100000)}";
-      var file = File('${tmpDir.path}/$fileName');
+      var tmpfilePath = '${tmpDir.path}/$tmpfileName';
+      print('tmpfilePath: $tmpfilePath');
+      var file = File(tmpfilePath);
       file.writeAsBytes(bytes.buffer.asInt8List(), mode: FileMode.write);
+
       //upload to firestore storage
-      StorageReference ref = FirebaseStorage.instance.ref().child(fileName);
+      StorageReference ref = FirebaseStorage.instance.ref().child(tmpfileName);
 
       StorageUploadTask task = ref.putFile(file);
       Uri downloadUrl = (await task.future).downloadUrl;
 
-      cacheAndCloud['cacheName'] = fileName; //eg 103750
+      cacheAndCloud['cacheName'] = _image.path; // tmpfileName; //eg 103750
       cacheAndCloud['cloudUrl'] = downloadUrl
           .toString(); // eg https://firebasestorage.googleapis.com/v0/b/offerz-1.appspot.com/o/2701.?alt=media&token=d70b4570-ada5-4245-a179-4641a749e881
     }
@@ -153,7 +158,7 @@ class _RegularMenuItemWidgetState extends State<RegularMenuItemForm> {
         child: FlatButton(
           color: AppThemeColors.textBackground,
           child: Text(
-            'Saved. Tap to return to menu',
+            'Saved to menu. Tap to return.',
             style: AppThemeText.informOK14,
           ),
           onPressed: widget.onCompleted,
@@ -165,14 +170,17 @@ class _RegularMenuItemWidgetState extends State<RegularMenuItemForm> {
           PrimaryButton(
             key: Key('submit'),
             text: widget.regularMenuItem.documentID == 'new'
-                ? 'Save NEW item'
-                : 'Update item',
+                ? 'Save this NEW item'
+                : 'Update this item',
             height: 40.0,
             onPressed: validateAndSubmit,
           ),
           FlatButton(
-              padding: EdgeInsets.only(top: 10.0),
-              child: Text('<cancel>'),
+              padding: EdgeInsets.only(top: 15.0),
+              child: Text(
+                '<cancel>',
+                style: AppThemeText.informOK14,
+              ),
               onPressed: widget.onCompleted),
         ],
       );
@@ -187,6 +195,33 @@ class _RegularMenuItemWidgetState extends State<RegularMenuItemForm> {
   Future<Null> takePhoto() async {
     _image = await ImagePicker.pickImage(source: ImageSource.camera);
     print('localImagePath (newly taken photo): ${_image.path}');
+  }
+
+  Column buildForm(bool afterSave) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          widget.regularMenuItem.documentID == 'new'
+              ? 'Add an item'
+              : 'Edit item',
+          style: AppThemeText.norm14,
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 1.0),
+          child: Form(
+            key: formKey,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: afterSave
+                    ? widget.regularMenuItem.formFieldsAffirmSave(_submitButton)
+                    : widget.regularMenuItem.formFields(
+                        _submitButton, _image != null, selectPhoto, takePhoto)),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -205,42 +240,9 @@ class _RegularMenuItemWidgetState extends State<RegularMenuItemForm> {
             child: Column(children: [
               Card(
                 child: _waitingOnUpload
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                            CircularProgressIndicator(
-                                value: null,
-                                backgroundColor: AppThemeColors.main[800]),
-                            Text(
-                              'Please wait, uploading picture...',
-                              style: AppThemeText.warn14,
-                            ),
-                          ])
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 1.0),
-                            child: Form(
-                              key: formKey,
-                              child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: _postSave
-                                      ? widget.regularMenuItem
-                                          .formFieldsAffirmSave(_submitButton)
-                                      : widget.regularMenuItem.formFields(
-                                          _submitButton,
-                                          _image != null,
-                                          selectPhoto,
-                                          takePhoto)),
-                            ),
-                          ),
-                        ],
-                      ),
+                    ? Utils
+                        .waitingIndicator('Please wait, uploading picture...')
+                    : buildForm(_postSave),
               ),
             ])));
   }

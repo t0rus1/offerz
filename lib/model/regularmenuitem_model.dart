@@ -108,7 +108,8 @@ class RegularMenuItemModel {
 
   Widget _galleryOrCameraButtonBar(
       NullFutureCallback onPhotoSelected, NullFutureCallback onPhotoTaken) {
-    return ButtonBar(alignment: MainAxisAlignment.start, children: <Widget>[
+    var btnBar =
+        ButtonBar(alignment: MainAxisAlignment.start, children: <Widget>[
       IconButton(
           padding: EdgeInsets.only(bottom: 5.0),
           icon: Icon(
@@ -129,6 +130,19 @@ class RegularMenuItemModel {
       ),
       Text('use\ncamera'),
     ]);
+    return Column(
+      children: <Widget>[
+        btnBar,
+        _picReminder(),
+      ],
+    );
+  }
+
+  Widget _picReminder() {
+    return Container(
+        padding: EdgeInsets.only(bottom: 5.0),
+        alignment: Alignment(0.0, 0.0),
+        child: Text('(change existing product pic using buttons above)'));
   }
 
   Widget _picChosenAffirmation() {
@@ -195,7 +209,7 @@ class RegularMenuItemModel {
           key: Key('variant'),
           initialValue: variant,
           decoration: InputDecoration.collapsed(
-              hintText: 'Sizes e.g. Small,Regular,Large',
+              hintText: 'Sizes e.g. Small/Regular/Large',
               border: UnderlineInputBorder()),
           maxLines: 1,
           autocorrect: false,
@@ -232,35 +246,10 @@ class RegularMenuItemModel {
           initialValue: name,
           enabled: false,
           decoration: InputDecoration(labelText: 'Name'),
-          autocorrect: false,
           validator: (val) => val.isEmpty ? 'Name can\'t be empty.' : null,
           onSaved: (val) => name = val.trim(),
         ),
       ),
-      Utils.padded(
-        child: TextFormField(
-          key: Key('variant'),
-          initialValue: variant,
-          enabled: false,
-          decoration: InputDecoration(labelText: 'Variant(s)'),
-          maxLines: 1,
-          autocorrect: false,
-          validator: (val) => null,
-          onSaved: (val) => variant = val.trim(),
-        ),
-      ),
-      Utils.padded(
-          child: TextFormField(
-              key: Key('price'),
-              initialValue: price,
-              enabled: false,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: 'Price(s)'),
-              autocorrect: false,
-              validator: (val) {
-                _validatePrices(val);
-              },
-              onSaved: (val) => val.trim())),
       cloudUrl == null || cloudUrl.isEmpty
           ? Text('No image was provided', style: AppThemeText.warn14)
           : Image.network(

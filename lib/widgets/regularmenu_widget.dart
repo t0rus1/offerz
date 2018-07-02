@@ -10,9 +10,10 @@ class RegularMenuWidget extends StatefulWidget {
   final EstablishmentModel establishment;
   final VoidCallback onNewItemWanted;
   final NullFutureCallbackWithString onEditItemWanted;
+  final NullFutureCallbackWithString onDeleteItemWanted;
 
   RegularMenuWidget(this.firestore, this.establishment, this.onNewItemWanted,
-      this.onEditItemWanted);
+      this.onEditItemWanted, this.onDeleteItemWanted);
 
   @override
   _RegularMenuState createState() => _RegularMenuState();
@@ -29,19 +30,20 @@ class _RegularMenuState extends State<RegularMenuWidget> {
   Widget build(BuildContext context) {
     return Container(
       child: Stack(
-        alignment: Alignment(1.0, 1.0),
+        alignment: Alignment(0.90, 0.98),
         children: <Widget>[
-          RegularMenuStreamWidget(
-              widget.establishment, widget.onEditItemWanted),
+          RegularMenuStreamWidget(widget.establishment, widget.onEditItemWanted,
+              widget.onDeleteItemWanted),
           Container(
-            color: AppThemeColors.textBackgroundMoreOpaque,
+            //color: AppThemeColors.textBackgroundMoreOpaque,
             child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text('Add an item to the menu', style: AppThemeText.norm14),
+                  //Text('Add an item to the menu', style: AppThemeText.norm14),
                   FloatingActionButton(
                       child: Icon(Icons.add,
                           color: AppThemeColors.main[50], size: 30.0),
+                      tooltip: 'add an item to the menu',
                       onPressed: () => widget.onNewItemWanted())
                 ]),
           )

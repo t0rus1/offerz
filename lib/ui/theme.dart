@@ -56,6 +56,26 @@ class AppThemeText {
       fontWeight: FontWeight.normal,
       color: AppThemeColors.textForegroundDark);
 
+  static const TextStyle norm16 = const TextStyle(
+      fontSize: 16.0,
+      fontWeight: FontWeight.normal,
+      color: AppThemeColors.textForegroundDark);
+
+  static const TextStyle norm18 = const TextStyle(
+      fontSize: 18.0,
+      fontWeight: FontWeight.normal,
+      color: AppThemeColors.textForegroundDark);
+
+  static const TextStyle norm20 = const TextStyle(
+      fontSize: 20.0,
+      fontWeight: FontWeight.normal,
+      color: AppThemeColors.textForegroundDark);
+
+  static const TextStyle norm24 = const TextStyle(
+      fontSize: 24.0,
+      fontWeight: FontWeight.normal,
+      color: AppThemeColors.textForegroundDark);
+
   static const TextStyle light14 = const TextStyle(
       fontSize: 14.0,
       fontWeight: FontWeight.w300,

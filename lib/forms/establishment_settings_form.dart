@@ -61,15 +61,22 @@ class EstablishmentSettingsWidgetState
         ),
       );
     } else {
-      return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: PrimaryButton(
+      return Column(children: <Widget>[
+        PrimaryButton(
           key: new Key('submit'),
           text: 'Submit',
           height: 44.0,
           onPressed: validateAndSubmit,
         ),
-      );
+        FlatButton(
+          padding: EdgeInsets.only(top: 15.0),
+          child: Text(
+            '<cancel>',
+            style: AppThemeText.informOK14,
+          ),
+          onPressed: widget.onCompleted,
+        )
+      ]);
     }
   }
 
@@ -83,10 +90,11 @@ class EstablishmentSettingsWidgetState
   Widget build(BuildContext context) {
     return SingleChildScrollView(
         child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            padding: const EdgeInsets.all(2.0),
             child: Column(children: [
-              Text('Set Name, Description & Product category here',
-                  style: AppThemeText.norm14),
+              Text(
+                  '(Note: some settings are auto filled by the establishment\'s Set Location option)',
+                  style: AppThemeText.light14),
               Card(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

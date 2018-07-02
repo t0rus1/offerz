@@ -33,7 +33,7 @@ class _OutletHomePageState extends State<EstablishmentHomePage> {
   String _targetItemID;
 
   static const List<Choice> choices = const <Choice>[
-    const Choice(title: 'Home', icon: Icons.share),
+    const Choice(title: 'Home', icon: Icons.home),
     const Choice(title: 'Regular Menu', icon: Icons.description),
     const Choice(title: 'Set Location', icon: Icons.location_on),
     const Choice(title: 'Other Settings', icon: Icons.settings),
@@ -44,8 +44,12 @@ class _OutletHomePageState extends State<EstablishmentHomePage> {
       case 'Home':
         return EstablishmentMapWidget(widget.establishment);
       case 'Regular Menu': // shows establishment menu
-        return RegularMenuWidget(widget.firestore, widget.establishment,
-            _onNewRegularMenuItemWanted, _onEditRegularMenuItemWanted);
+        return RegularMenuWidget(
+            widget.firestore,
+            widget.establishment,
+            _onNewRegularMenuItemWanted,
+            _onEditRegularMenuItemWanted,
+            _onDeleteRegularMenuItemWanted);
       case 'Set Location': // allows owner to locate his outlet
         return EstablishmentLocationWidget(
             widget.establishment, _onOutletLocationConfirmed);
@@ -83,8 +87,8 @@ class _OutletHomePageState extends State<EstablishmentHomePage> {
         .collection('establishments')
         .document(estab.documentID);
 
-    estabDoc.setData(estab.coOrdsMap, merge: true).whenComplete(() {
-      print('updated lat & long in ${estab.name} record');
+    estabDoc.setData(estab.localizationMap, merge: true).whenComplete(() {
+      print('updated localization in ${estab.name} record');
       outletProfileUpdated();
     }).catchError((e) => print(e));
   }
@@ -98,8 +102,8 @@ class _OutletHomePageState extends State<EstablishmentHomePage> {
     });
   }
 
-  //load and return a menu item for editing
-  Future<RegularMenuItemModel> loadMenuItemForEdit(String itemID) async {
+  //load and return a menu item for editing / deleting
+  Future<RegularMenuItemModel> loadMenuItem(String itemID) async {
     var estabDoc = widget.firestore
         .collection('establishments')
         .document(widget.establishment.documentID);
@@ -107,20 +111,73 @@ class _OutletHomePageState extends State<EstablishmentHomePage> {
     var menuItemDoc = estabDoc.collection('menu').document(itemID);
 
     var menuShot = await menuItemDoc.get();
-    print(
-        'loadMenuItemForEdit ${menuShot.documentID} name: ${menuShot.data['name']}');
+    print('loadMenuItem ${menuShot.documentID} name: ${menuShot.data['name']}');
     return RegularMenuItemModel(menuShot.documentID, menuShot.data);
+  }
+
+  DocumentReference getMenuItemDoc(String itemID) {
+    var estabDoc = widget.firestore
+        .collection('establishments')
+        .document(widget.establishment.documentID);
+
+    return estabDoc.collection('menu').document(itemID);
   }
 
   //user wants to edit an existing menu item
   Future<Null> _onEditRegularMenuItemWanted(String targetItemID) async {
     print('_onEditRegularMenuItemWanted for item $targetItemID');
-    loadMenuItemForEdit(targetItemID).then((loadedItem) {
+    loadMenuItem(targetItemID).then((loadedItem) {
       setState(() {
         //construct a 'fake' choice to get a card showing form fields to edit menu item
         _regularMenuItem = loadedItem;
         _targetItemID = targetItemID;
         _selectedChoice = Choice(title: '__editRegularMenuItemWanted');
+      });
+    });
+  }
+
+  Future<Null> _confirmDeletion(RegularMenuItemModel item) async {
+    return showDialog<Null>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          title: new Text('Confirm deletion'),
+          content: new SingleChildScrollView(
+            child: new ListBody(
+              children: <Widget>[
+                new Text('Delete ${item.name}?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text('YES'),
+              onPressed: () {
+                //we need a doc reference in order to delete
+                var menuItemDoc = getMenuItemDoc(item.documentID);
+                menuItemDoc.delete();
+                Navigator.of(context).pop();
+              },
+            ),
+            new FlatButton(
+              child: new Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<Null> _onDeleteRegularMenuItemWanted(String targetItemID) async {
+    print('_onDeleteRegularMenuItemWanted for item $targetItemID');
+    loadMenuItem(targetItemID).then((loadedItem) {
+      _confirmDeletion(loadedItem).whenComplete(() {
+        // setState(() {
+        // });
       });
     });
   }
@@ -143,6 +200,18 @@ class _OutletHomePageState extends State<EstablishmentHomePage> {
     setState(() {
       _selectedChoice = choices.firstWhere((c) => c.title == 'Home');
     });
+  }
+
+  PopupMenuButton<Choice> buildPopupMenu() {
+    return PopupMenuButton<Choice>(
+      onSelected: _select,
+      itemBuilder: (BuildContext context) {
+        return choices.skip(2).map((Choice choice) {
+          return PopupMenuItem<Choice>(
+              value: choice, child: Text(choice.title));
+        }).toList();
+      },
+    );
   }
 
   @override
@@ -172,15 +241,7 @@ class _OutletHomePageState extends State<EstablishmentHomePage> {
             tooltip: 'manage the menu',
           ),
           // overflow menu
-          PopupMenuButton<Choice>(
-            onSelected: _select,
-            itemBuilder: (BuildContext context) {
-              return choices.skip(2).map((Choice choice) {
-                return PopupMenuItem<Choice>(
-                    value: choice, child: Text(choice.title));
-              }).toList();
-            },
-          )
+          buildPopupMenu()
         ],
       ),
       backgroundColor: AppThemeColors.main[400],

@@ -5,6 +5,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  connectivity: "^0.3.1"
   firebase_auth: ^0.5.11
   firebase_storage: "^0.3.7"
   cloud_firestore: ^0.7.3 
